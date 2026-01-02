@@ -604,7 +604,7 @@ def tela_login():
             try:
                 senha_correta = st.secrets["SENHA_CORPORATIVA"]
             except:
-                senha_correta = "Unimed@2024!Dashboard"
+                senha_correta = "Diariasd@2025!Dashboard"
                 st.warning("⚠️ Usando senha padrão. Configure os Secrets no Streamlit Cloud.")
             
             if senha_digitada == senha_correta:
