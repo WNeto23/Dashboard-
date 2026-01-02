@@ -1,4 +1,4 @@
-# dashboard_unimed_streamlit_cloud.py
+# dashboard_unimed_streamlit_cloud_completo.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -25,8 +25,9 @@ st.set_page_config(
     menu_items={
         'Get Help': 'https://www.unimed.com.br',
         'Report a bug': None,
-        'About': f"""
+        'About': """
         Dashboard de Diárias Hospitalares - Unimed
+        Desenvolvido por Waltuiro Neto
         """
     }
 )
@@ -47,7 +48,7 @@ else:
 # Informações do Sistema
 DESENVOLVEDOR = "Waltuiro Neto - Analista de Relacionamento com a Rede"
 PERIODO_BASE = "Janeiro a Novembro"
-VERSAO = "7.0.0 (Streamlit Cloud Edition)"
+VERSAO = "9.0.0 (Streamlit Cloud Completo)"
 LINK_ACESSO = "https://dashboard-unimed.streamlit.app"
 
 # ============================================
@@ -101,6 +102,12 @@ def aplicar_css():
                 font-weight: 500 !important;
             }
             
+            .metric-subtext {
+                font-size: 12px !important;
+                color: #64748b !important;
+                margin-top: 5px !important;
+            }
+            
             /* Abas */
             .stTabs [data-baseweb="tab-list"] {
                 gap: 8px !important;
@@ -132,6 +139,28 @@ def aplicar_css():
                 background-color: #1e293b !important;
                 border-right: 1px solid #334155 !important;
             }
+            
+            /* Cards com sombra e hover */
+            .info-card {
+                background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+                border-radius: 10px !important;
+                padding: 20px !important;
+                margin-bottom: 15px !important;
+                border-left: 4px solid !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+                border: 1px solid #334155 !important;
+                transition: all 0.3s ease !important;
+            }
+            
+            .info-card:hover {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+                transform: translateY(-2px) !important;
+            }
+            
+            .card-local { border-left-color: #22c55e !important; }
+            .card-intercambio { border-left-color: #3b82f6 !important; }
+            .card-info { border-left-color: #f59e0b !important; }
+            .card-success { border-left-color: #10b981 !important; }
             
             /* Botões */
             .stButton > button {
@@ -199,33 +228,6 @@ def aplicar_css():
             ::-webkit-scrollbar-thumb:hover {
                 background: #64748b;
             }
-            
-            /* Tooltip personalizado */
-            .tooltip {
-                position: relative;
-                display: inline-block;
-                border-bottom: 1px dotted #64748b;
-            }
-            
-            .tooltip .tooltiptext {
-                visibility: hidden;
-                background-color: #1e293b;
-                color: #e2e8f0;
-                text-align: center;
-                border-radius: 6px;
-                padding: 5px 10px;
-                position: absolute;
-                z-index: 1;
-                bottom: 125%;
-                left: 50%;
-                transform: translateX(-50%);
-                white-space: nowrap;
-                border: 1px solid #334155;
-            }
-            
-            .tooltip:hover .tooltiptext {
-                visibility: visible;
-            }
         </style>
         """
     else:
@@ -274,6 +276,12 @@ def aplicar_css():
                 font-weight: 500 !important;
             }
             
+            .metric-subtext {
+                font-size: 12px !important;
+                color: #94a3b8 !important;
+                margin-top: 5px !important;
+            }
+            
             /* Abas */
             .stTabs [data-baseweb="tab-list"] {
                 gap: 8px !important;
@@ -305,6 +313,28 @@ def aplicar_css():
                 background-color: #f1f5f9 !important;
                 border-right: 1px solid #e2e8f0 !important;
             }
+            
+            /* Cards com sombra e hover */
+            .info-card {
+                background: white !important;
+                border-radius: 10px !important;
+                padding: 20px !important;
+                margin-bottom: 15px !important;
+                border-left: 4px solid !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+                border: 1px solid #e2e8f0 !important;
+                transition: all 0.3s ease !important;
+            }
+            
+            .info-card:hover {
+                box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.1) !important;
+                transform: translateY(-2px) !important;
+            }
+            
+            .card-local { border-left-color: #16a34a !important; }
+            .card-intercambio { border-left-color: #2563eb !important; }
+            .card-info { border-left-color: #d97706 !important; }
+            .card-success { border-left-color: #059669 !important; }
             
             /* Botões */
             .stButton > button {
@@ -386,35 +416,21 @@ aplicar_css()
 # SISTEMA DE LOGIN CORPORATIVO AVANÇADO
 # ============================================
 def check_password():
-    """Sistema de login corporativo com múltiplas camadas de segurança"""
+    """Sistema de login corporativo"""
     def password_entered():
         """Verifica se a senha está correta."""
-        # ✅ CORREÇÃO: Usar Secrets do Streamlit Cloud
-        # IMPORTANTE: No Streamlit Cloud, configure no Secrets:
-        # SENHA_CORPORATIVA = "Unimed@2024!Dashboard"
-        
         try:
             # Tentar usar Secrets do Streamlit Cloud
             SENHA_CORPORATIVA = st.secrets["SENHA_CORPORATIVA"]
         except:
             # Fallback para desenvolvimento local
             SENHA_CORPORATIVA = "Unimed@2024!Dashboard"
-            st.warning("⚠️ Usando senha padrão para desenvolvimento. Configure os Secrets no Streamlit Cloud.")
         
         # Verificar senha
         if st.session_state["password"] == SENHA_CORPORATIVA:
             st.session_state["password_correct"] = True
             st.session_state["login_time"] = datetime.now()
             del st.session_state["password"]
-            
-            # Registrar acesso (em memória)
-            if 'access_log' not in st.session_state:
-                st.session_state.access_log = []
-            
-            st.session_state.access_log.append({
-                'timestamp': datetime.now(),
-                'action': 'login_success'
-            })
         else:
             st.session_state["password_correct"] = False
             
@@ -436,7 +452,6 @@ def check_password():
     
     # Tela de login
     if "password_correct" not in st.session_state:
-        # Layout de login profissional
         col_left, col_center, col_right = st.columns([1, 2, 1])
         
         with col_center:
@@ -472,38 +487,12 @@ def check_password():
             
             st.markdown("""
                 </div>
-                
-                <div style="margin-top: 20px; padding: 15px; background: {'#0f172a' if st.session_state.tema == 'dark' else '#f8fafc'}; 
-                            border-radius: 8px; border-left: 4px solid #3b82f6;">
-                    <p style="color: {'#94a3b8' if st.session_state.tema == 'dark' else '#64748b'}; font-size: 12px; margin: 0;">
-                        <strong>ℹ️ Informações:</strong><br>
-                        • Acesso via link oficial seguro<br>
-                        • Dados confidenciais da corporação<br>
-                        • Sessão válida por 8 horas
-                    </p>
-                </div>
             """, unsafe_allow_html=True)
             
             # Mensagem de erro
             if "password_correct" in st.session_state and not st.session_state["password_correct"]:
                 attempts = st.session_state.get('failed_attempts', 0)
-                st.error(f"""
-                ❌ **Senha incorreta.** 
-                
-                Tentativa {attempts} de 5.
-                {f'⚠️ **{5 - attempts} tentativas restantes** antes do bloqueio.' if attempts < 5 else '🚫 **Acesso bloqueado temporariamente.**'}
-                """)
-        
-        # Rodapé da tela de login
-        st.markdown("---")
-        st.markdown(f"""
-        <div style="text-align: center; color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; font-size: 12px; padding: 20px;">
-            <p><strong>Dashboard Unimed v{VERSAO}</strong> • Desenvolvido por {DESENVOLVEDOR}</p>
-            <p>📅 {datetime.now().strftime('%A, %d de %B de %Y')} • 🕐 {datetime.now().strftime('%H:%M:%S')}</p>
-            <p>🌐 Acesso via: <code>{LINK_ACESSO}</code></p>
-            <p>🔒 Sistema de autenticação corporativa • Streamlit Cloud</p>
-        </div>
-        """, unsafe_allow_html=True)
+                st.error(f"❌ **Senha incorreta.** Tentativa {attempts} de 5.")
         
         return False
     
@@ -620,240 +609,118 @@ def alternar_tema():
         st.session_state.tema = "dark"
     st.rerun()
 
-def get_base64_image(image_path):
-    """Converte imagem para base64 para usar em CSS"""
-    try:
-        with open(image_path, "rb") as img_file:
-            return base64.b64encode(img_file.read()).decode()
-    except:
-        return ""
-
 # ============================================
-# FUNÇÃO DE CARREGAMENTO DE DADOS OTIMIZADA
+# FUNÇÃO DE CARREGAMENTO DE DADOS DO CSV
 # ============================================
-@st.cache_data(ttl=3600, show_spinner="📊 Carregando e processando dados...")
-def carregar_e_preparar_dados():
+@st.cache_data(ttl=3600, show_spinner="📊 Carregando dados do CSV...")
+def carregar_dados_csv():
     """
-    Carrega e prepara os dados do arquivo CSV na mesma pasta
-    Otimizado para Streamlit Cloud
+    Carrega dados do arquivo CSV 'dados_reais.csv'
     """
     try:
-        # Tenta carregar dados reais
+        # Tentar carregar dados do CSV
         df = pd.read_csv('dados_reais.csv', encoding='utf-8')
         
-        # Log de carregamento
-        st.session_state.data_loaded = True
-        st.session_state.data_rows = len(df)
-        st.session_state.load_time = datetime.now()
+        st.success(f"✅ Dados carregados com sucesso! {len(df)} registros encontrados.")
         
-        # Remover espaços em branco
-        for col in df.columns:
-            if df[col].dtype == 'object':
-                df[col] = df[col].astype(str).str.strip()
+        # Limpeza básica
+        df = df.dropna(subset=['VL_LIBERADO', 'QT_ITEM'])
+        df = df[df['VL_LIBERADO'] > 0]
+        df = df[df['QT_ITEM'] > 0]
         
-        # Verificar colunas obrigatórias
-        colunas_obrigatorias = ['NM_PRESTADOR_EXEC', 'DS_PROCEDIMENTO', 
-                               'CD_BENEFICIARIO', 'QT_ITEM', 'VL_LIBERADO']
+        # Verificar colunas necessárias
+        colunas_necessarias = ['NM_PRESTADOR_EXEC', 'DS_PROCEDIMENTO', 'CD_BENEFICIARIO', 'QT_ITEM', 'VL_LIBERADO']
+        colunas_faltantes = [col for col in colunas_necessarias if col not in df.columns]
         
-        colunas_faltantes = [col for col in colunas_obrigatorias if col not in df.columns]
         if colunas_faltantes:
-            st.warning(f"⚠️ Colunas faltantes: {', '.join(colunas_faltantes)}")
-            return criar_dados_simulados()
+            st.warning(f"⚠️ Colunas faltantes no CSV: {', '.join(colunas_faltantes)}")
+            return None
         
-        # ============================================
-        # PROCESSAMENTO DA COMPETÊNCIA
-        # ============================================
-        colunas_competencia = ['COMPETENCIA', 'COMPETÊNCIA', 'COMP', 'MES_ANO', 'MES', 'ANO']
-        coluna_competencia_encontrada = None
-        
-        for col in colunas_competencia:
-            if col in df.columns:
-                coluna_competencia_encontrada = col
-                break
-        
-        if coluna_competencia_encontrada:
-            # Processar competência no formato AAAAMM
-            df[coluna_competencia_encontrada] = df[coluna_competencia_encontrada].astype(str).str.strip()
+        # Processar competência se existir
+        if 'COMPETENCIA' in df.columns:
+            # Converter para string e limpar
+            df['COMPETENCIA'] = df['COMPETENCIA'].astype(str).str.strip()
             
+            # Extrair ano e mês do formato AAAAMM
             def extrair_ano_mes(competencia):
                 try:
                     competencia_str = str(competencia).strip()
                     if len(competencia_str) == 6 and competencia_str.isdigit():
                         ano = int(competencia_str[:4])
                         mes = int(competencia_str[4:6])
-                        return ano, mes
-                    return None, None
+                        if 1 <= mes <= 12:
+                            return ano, mes
                 except:
-                    return None, None
+                    pass
+                return 2024, np.random.randint(1, 13)  # Fallback
             
             df[['ANO_COMP', 'MES_COMP']] = df.apply(
-                lambda x: pd.Series(extrair_ano_mes(x[coluna_competencia_encontrada])), 
+                lambda x: pd.Series(extrair_ano_mes(x['COMPETENCIA'])), 
                 axis=1
             )
             
             df['MES_NOME'] = df['MES_COMP'].apply(obter_nome_mes)
             df['MES_ANO_FORMATADO'] = df.apply(
-                lambda x: f"{obter_nome_mes(x['MES_COMP'])}/{x['ANO_COMP']}" 
-                if pd.notna(x['MES_COMP']) and pd.notna(x['ANO_COMP']) 
-                else "Data inválida", 
+                lambda x: f"{obter_nome_mes(x['MES_COMP'])}/{x['ANO_COMP']}", 
                 axis=1
             )
             
             df['DATA_COMPETENCIA'] = df.apply(
-                lambda x: datetime(int(x['ANO_COMP']), int(x['MES_COMP']), 1) 
-                if pd.notna(x['MES_COMP']) and pd.notna(x['ANO_COMP']) 
-                else pd.NaT, 
+                lambda x: datetime(int(x['ANO_COMP']), int(x['MES_COMP']), 1), 
                 axis=1
             )
-            
-            df = df.sort_values('DATA_COMPETENCIA')
         else:
-            # Se não tem competência, criar com base na data atual
+            # Criar competências fictícias se não existir
             df['ANO_COMP'] = 2024
-            df['MES_COMP'] = np.random.randint(1, 12, len(df))
+            df['MES_COMP'] = np.random.randint(1, 13, len(df))
             df['MES_NOME'] = df['MES_COMP'].apply(obter_nome_mes)
             df['MES_ANO_FORMATADO'] = df.apply(lambda x: f"{obter_nome_mes(x['MES_COMP'])}/2024", axis=1)
             df['DATA_COMPETENCIA'] = df.apply(lambda x: datetime(2024, int(x['MES_COMP']), 1), axis=1)
         
-        # ============================================
-        # CLASSIFICAÇÃO LOCAL/INTERCÂMBIO
-        # ============================================
-        if 'TP_PRESTADOR_EXEC' in df.columns:
-            df['TP_PRESTADOR_ORIGINAL'] = df['TP_PRESTADOR_EXEC']
-            
-            def classificar_local_intercambio(tipo):
-                if pd.isna(tipo):
-                    return 'LOCAL'
-                tipo_str = str(tipo).upper().strip()
-                palavras_intercambio = ['INTERCÂMBIO', 'INTERCAMBIO', 'INTER', 'EXTRA', 'FORA', 'EXTERNO']
-                for palavra in palavras_intercambio:
-                    if palavra in tipo_str:
-                        return 'INTERCÂMBIO'
+        # Classificar LOCAL/INTERCÂMBIO
+        palavras_intercambio = [
+            'SÍRIO', 'SIRIO', 'LIBANÊS', 'ALBERT EINSTEIN', 'EINSTEIN',
+            'MOINHOS DE VENTO', 'MOINHOS', 'HOSPITAL SÃO PAULO',
+            'SÃO PAULO', 'RIO DE JANEIRO', 'BRASÍLIA', 'HCFMUSP',
+            'HOSPITAL DAS CLÍNICAS', 'CLÍNICAS'
+        ]
+        
+        def classificar_por_nome(nome):
+            if pd.isna(nome):
                 return 'LOCAL'
             
-            df['TP_PRESTADOR_CLASSIFICADO'] = df['TP_PRESTADOR_EXEC'].apply(classificar_local_intercambio)
-        else:
-            df['TP_PRESTADOR_ORIGINAL'] = 'NÃO INFORMADO'
+            nome_str = str(nome).upper()
             
-            palavras_intercambio = [
-                'SÍRIO', 'SIRIO', 'LIBANÊS', 'ALBERT EINSTEIN', 'EINSTEIN',
-                'MOINHOS DE VENTO', 'MOINHOS', 'HOSPITAL SÃO PAULO',
-                'SÃO PAULO', 'RIO DE JANEIRO', 'BRASÍLIA', 'HCFMUSP',
-                'HOSPITAL DAS CLÍNICAS', 'CLÍNICAS', 'SANTAS CASAS',
-                'SANTA CASA DE SÃO PAULO', 'UNIFESP', 'HOSPITAL DO SERVIDOR',
-                'SERVIDOR PÚBLICO', 'HOSPITAL PORTUGUÊS', 'PORTUGUÊS'
-            ]
-            
-            def classificar_por_nome(nome):
-                if pd.isna(nome):
-                    return 'LOCAL'
-                
-                nome_str = str(nome).upper()
-                
-                if 'UNIMED' in nome_str:
-                    return 'LOCAL'
-                
-                for palavra in palavras_intercambio:
-                    if palavra in nome_str:
-                        return 'INTERCÂMBIO'
-                
+            if 'UNIMED' in nome_str:
                 return 'LOCAL'
             
-            df['TP_PRESTADOR_CLASSIFICADO'] = df['NM_PRESTADOR_EXEC'].apply(classificar_por_nome)
+            for palavra in palavras_intercambio:
+                if palavra in nome_str:
+                    return 'INTERCÂMBIO'
+            
+            return 'LOCAL'
         
-        # Município
-        if 'MUNICIPIO_PRESTADOR' not in df.columns:
-            df['MUNICIPIO_PRESTADOR'] = 'NÃO INFORMADO'
-        else:
-            df['MUNICIPIO_PRESTADOR'] = df['MUNICIPIO_PRESTADOR'].astype(str).str.strip()
+        df['TP_PRESTADOR_CLASSIFICADO'] = df['NM_PRESTADOR_EXEC'].apply(classificar_por_nome)
         
-        # Limpeza básica
-        df = df[df['VL_LIBERADO'] > 0]
-        df = df[df['QT_ITEM'] > 0]
-        
-        # Conversão de tipos
-        try:
-            df['CD_BENEFICIARIO'] = pd.to_numeric(df['CD_BENEFICIARIO'], errors='coerce')
-            df['QT_ITEM'] = pd.to_numeric(df['QT_ITEM'], errors='coerce').fillna(0).astype(int)
-            df['VL_LIBERADO'] = pd.to_numeric(df['VL_LIBERADO'], errors='coerce')
-        except:
-            pass
-        
-        # Adicionar coluna de valor por diária
+        # Adicionar valor por diária
         df['VL_POR_DIARIA'] = df['VL_LIBERADO'] / df['QT_ITEM']
+        
+        # Ordenar por competência
+        df = df.sort_values('DATA_COMPETENCIA')
         
         return df
         
     except Exception as e:
-        st.error(f"❌ Erro ao carregar dados: {str(e)[:100]}")
-        return criar_dados_simulados()
-
-def criar_dados_simulados():
-    """Cria dados simulados para demonstração"""
-    np.random.seed(42)
-    n = 1500  # Reduzido para melhor performance
-    
-    prestadores_local = [
-        'UNIMED RIO VERDE', 'UNIMED JATAÍ', 'UNIMED SANTA HELENA',
-        'HOSPITAL SÃO LUCAS RIO VERDE', 'SANTA CASA DE RIO VERDE',
-        'CLÍNICA SÃO JOSÉ', 'PRONTO SOCORRO MUNICIPAL'
-    ]
-    
-    prestadores_intercambio = [
-        'HOSPITAL SÍRIO-LIBANÊS SÃO PAULO', 'HOSPITAL ALBERT EINSTEIN',
-        'HOSPITAL MOINHOS DE VENTO', 'HOSPITAL SÃO PAULO',
-        'SANTA CASA DE SÃO PAULO', 'HOSPITAL DAS CLÍNICAS USP'
-    ]
-    
-    prestadores = prestadores_local + prestadores_intercambio
-    
-    procedimentos = [
-        'DIÁRIA DE UTI ADULTO', 'DIÁRIA DE UTI PEDIÁTRICA', 
-        'DIÁRIA DE ENFERMARIA', 'DIÁRIA SEMI-INTENSIVA',
-        'DIÁRIA DE ACOMPANHANTE', 'DIÁRIA DE OBSERVAÇÃO'
-    ]
-    
-    df = pd.DataFrame({
-        'NM_PRESTADOR_EXEC': np.random.choice(prestadores, n, 
-            p=[0.15, 0.12, 0.08, 0.1, 0.08, 0.07, 0.05, 0.08, 0.07, 0.06, 0.06, 0.05, 0.03]),
-        'DS_PROCEDIMENTO': np.random.choice(procedimentos, n, p=[0.35, 0.15, 0.25, 0.1, 0.1, 0.05]),
-        'CD_BENEFICIARIO': np.random.randint(10000, 99999, n),
-        'QT_ITEM': np.random.randint(1, 15, n),
-        'VL_LIBERADO': np.random.exponential(600, n) + 300,
-        'MUNICIPIO_PRESTADOR': np.random.choice(['Rio Verde', 'Jataí', 'Santa Helena', 'São Paulo', 'Rio de Janeiro'], n,
-            p=[0.4, 0.2, 0.15, 0.15, 0.1])
-    })
-    
-    df['VL_LIBERADO'] = df['VL_LIBERADO'].clip(200, 2500).round(2)
-    
-    # Adicionar competência
-    df['ANO_COMP'] = 2024
-    df['MES_COMP'] = np.random.randint(1, 12, n)
-    df['MES_NOME'] = df['MES_COMP'].apply(obter_nome_mes)
-    df['MES_ANO_FORMATADO'] = df.apply(lambda x: f"{obter_nome_mes(x['MES_COMP'])}/2024", axis=1)
-    df['DATA_COMPETENCIA'] = df.apply(lambda x: datetime(2024, int(x['MES_COMP']), 1), axis=1)
-    
-    # Classificar LOCAL/INTERCÂMBIO
-    def classificar_simulado(nome):
-        nome_str = str(nome).upper()
-        intercambios = ['SÍRIO', 'SIRIO', 'EINSTEIN', 'MOINHOS', 'SÃO PAULO', 'RIO DE JANEIRO', 'CLÍNICAS', 'SANTA CASA DE SÃO PAULO']
-        for inter in intercambios:
-            if inter in nome_str:
-                return 'INTERCÂMBIO'
-        return 'LOCAL'
-    
-    df['TP_PRESTADOR_CLASSIFICADO'] = df['NM_PRESTADOR_EXEC'].apply(classificar_simulado)
-    df['VL_POR_DIARIA'] = df['VL_LIBERADO'] / df['QT_ITEM']
-    
-    return df
+        st.error(f"❌ Erro ao carregar dados do CSV: {str(e)}")
+        return None
 
 # ============================================
-# SIDEBAR AVANÇADA
+# SIDEBAR
 # ============================================
 def render_sidebar():
     """Renderiza a sidebar"""
     with st.sidebar:
-        # Cabeçalho com informações
+        # Cabeçalho
         st.markdown(f"""
         <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid {'#334155' if st.session_state.tema == 'dark' else '#e2e8f0'};">
             <h2 style="color: #3b82f6; margin-bottom: 5px;">🏥 UNIMED</h2>
@@ -882,8 +749,8 @@ def render_sidebar():
         st.markdown("### 📊 Status do Sistema")
         
         # Carregar dados para status
-        df_status = carregar_e_preparar_dados()
-        if not df_status.empty:
+        df_status = carregar_dados_csv()
+        if df_status is not None:
             col_stat1, col_stat2 = st.columns(2)
             with col_stat1:
                 st.metric("📈 Registros", formatar_inteiro_br(len(df_status)))
@@ -891,49 +758,30 @@ def render_sidebar():
                 valor_total_status = df_status['VL_LIBERADO'].sum()
                 st.metric("💰 Total", formatar_moeda_br(valor_total_status))
             
-            # Informações adicionais
             with st.expander("ℹ️ Informações detalhadas"):
                 st.write(f"**Período:** {PERIODO_BASE}")
                 st.write(f"**Prestadores únicos:** {df_status['NM_PRESTADOR_EXEC'].nunique()}")
                 st.write(f"**Procedimentos:** {df_status['DS_PROCEDIMENTO'].nunique()}")
-                st.write(f"**Municípios:** {df_status['MUNICIPIO_PRESTADOR'].nunique()}")
+                
+                if 'MUNICIPIO_PRESTADOR' in df_status.columns:
+                    st.write(f"**Municípios:** {df_status['MUNICIPIO_PRESTADOR'].nunique()}")
                 
                 # Distribuição
                 local_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICADO'] == 'LOCAL'])
                 intercambio_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICADO'] == 'INTERCÂMBIO'])
-                st.write(f"**Local:** {local_count} ({local_count/len(df_status)*100:.1f}%)")
-                st.write(f"**Intercâmbio:** {intercambio_count} ({intercambio_count/len(df_status)*100:.1f}%)")
+                total = len(df_status)
+                if total > 0:
+                    st.write(f"**Local:** {local_count} ({local_count/total*100:.1f}%)")
+                    st.write(f"**Intercâmbio:** {intercambio_count} ({intercambio_count/total*100:.1f}%)")
         
         st.markdown("---")
         
-        # Informações de acesso
-        st.markdown("### 🔐 Informações de Acesso")
-        
-        if 'login_time' in st.session_state:
-            tempo_sessao = datetime.now() - st.session_state["login_time"]
-            horas = int(tempo_sessao.total_seconds() // 3600)
-            minutos = int((tempo_sessao.total_seconds() % 3600) // 60)
-            
-            st.info(f"""
-            **Sessão ativa:** {horas}h {minutos}min
-            **Expira em:** {8 - horas}h {60 - minutos}min
-            """)
-        
         # Botão de logout
         if st.button("🚪 Sair do Sistema", use_container_width=True, type="secondary"):
-            # Registrar logout
-            if 'access_log' in st.session_state:
-                st.session_state.access_log.append({
-                    'timestamp': datetime.now(),
-                    'action': 'logout'
-                })
-            
-            # Limpar sessão
             keys_to_clear = ['password_correct', 'login_time', 'failed_attempts']
             for key in keys_to_clear:
                 if key in st.session_state:
                     del st.session_state[key]
-            
             st.success("✅ Logout realizado com sucesso!")
             st.rerun()
         
@@ -949,10 +797,10 @@ def render_sidebar():
         """, unsafe_allow_html=True)
 
 # ============================================
-# DASHBOARD PRINCIPAL
+# DASHBOARD PRINCIPAL COM TODOS OS GRÁFICOS
 # ============================================
 def dashboard_principal():
-    """Dashboard principal com todas as funcionalidades"""
+    """Dashboard principal com TODOS os gráficos"""
     
     # Cabeçalho principal
     col_header1, col_header2, col_header3 = st.columns([4, 1, 1])
@@ -976,183 +824,251 @@ def dashboard_principal():
         """, unsafe_allow_html=True)
     
     with col_header3:
-        if st.button("🔄 Atualizar", use_container_width=True, help="Recarregar dados e atualizar dashboard"):
+        if st.button("🔄 Atualizar", use_container_width=True, help="Recarregar dados"):
             st.cache_data.clear()
             st.rerun()
     
-    # Carregar dados
-    with st.spinner("📊 Carregando dados..."):
-        df = carregar_e_preparar_dados()
+    # Carregar dados do CSV
+    with st.spinner("📊 Carregando dados do CSV..."):
+        df = carregar_dados_csv()
     
-    if df.empty:
-        st.error("Não foi possível carregar os dados. Verifique o arquivo 'dados_reais.csv'.")
+    if df is None:
+        st.error("""
+        ❌ **Não foi possível carregar os dados do CSV.**
+        
+        **Solução:**
+        1. Verifique se o arquivo `dados_reais.csv` está na mesma pasta do dashboard
+        2. Verifique se o CSV tem as colunas obrigatórias:
+           - `NM_PRESTADOR_EXEC`
+           - `DS_PROCEDIMENTO`
+           - `CD_BENEFICIARIO`
+           - `QT_ITEM`
+           - `VL_LIBERADO`
+        3. Recarregue a página
+        """)
         return
     
     # ============================================
     # SEÇÃO DE FILTROS
     # ============================================
     st.markdown("## 🔧 Filtros Avançados")
+    st.markdown(f"*Período base: {PERIODO_BASE}*")
     
-    # Container de filtros com tabs
-    filtro_tab1, filtro_tab2 = st.tabs(["📋 Filtros Básicos", "⚙️ Filtros Avançados"])
-    
-    with filtro_tab1:
-        col_f1, col_f2, col_f3, col_f4 = st.columns(4)
+    with st.container():
+        col1, col2, col3, col4 = st.columns(4)
         
-        with col_f1:
-            # Competência
+        with col1:
+            # FILTRO DE COMPETÊNCIA
             if 'MES_ANO_FORMATADO' in df.columns:
-                competencias = ['TODAS AS COMPETÊNCIAS'] + ordenar_meses(df['MES_ANO_FORMATADO'].unique().tolist())
+                competencias_lista = df['MES_ANO_FORMATADO'].unique().tolist()
+                competencias_ordenadas = ordenar_meses(competencias_lista)
+                competencias_opcoes = ['TODAS AS COMPETÊNCIAS'] + competencias_ordenadas
+                
                 competencia_selecionada = st.selectbox(
-                    "📅 Competência",
-                    competencias,
-                    key="filtro_competencia_basic"
+                    "📅 Competência:",
+                    competencias_opcoes,
+                    index=0,
+                    key="filtro_competencia"
                 )
             else:
                 competencia_selecionada = 'TODAS AS COMPETÊNCIAS'
         
-        with col_f2:
-            # Tipo
+        with col2:
+            # FILTRO DE TIPO
+            tipo_opcoes = ['TODOS', 'LOCAL', 'INTERCÂMBIO']
             tipo_selecionado = st.selectbox(
-                "🏢 Tipo",
-                ['TODOS', 'LOCAL', 'INTERCÂMBIO'],
-                key="filtro_tipo_basic"
+                "🏢 Tipo:",
+                tipo_opcoes,
+                index=0,
+                key="filtro_tipo"
             )
         
-        with col_f3:
-            # Município
-            municipios = ['TODOS OS MUNICÍPIOS'] + sorted(df['MUNICIPIO_PRESTADOR'].unique().tolist())
-            municipio_selecionado = st.selectbox(
-                "📍 Município",
-                municipios,
-                key="filtro_municipio_basic"
-            )
+        with col3:
+            # FILTRO DE MUNICÍPIO (se existir)
+            if 'MUNICIPIO_PRESTADOR' in df.columns:
+                df_filtro_municipio = df.copy()
+                
+                if competencia_selecionada != 'TODAS AS COMPETÊNCIAS':
+                    df_filtro_municipio = df_filtro_municipio[df_filtro_municipio['MES_ANO_FORMATADO'] == competencia_selecionada]
+                
+                if tipo_selecionado != 'TODOS':
+                    df_filtro_municipio = df_filtro_municipio[df_filtro_municipio['TP_PRESTADOR_CLASSIFICADO'] == tipo_selecionado]
+                
+                municipios_disponiveis = sorted(df_filtro_municipio['MUNICIPIO_PRESTADOR'].unique().tolist())
+                municipios_opcoes = ['TODOS OS MUNICÍPIOS'] + municipios_disponiveis
+                
+                municipio_selecionado = st.selectbox(
+                    "📍 Município:",
+                    municipios_opcoes,
+                    index=0,
+                    key="filtro_municipio"
+                )
+            else:
+                municipio_selecionado = 'TODOS OS MUNICÍPIOS'
+                st.info("ℹ️ Coluna de município não encontrada")
         
-        with col_f4:
-            # Prestador
-            prestadores = ['TODOS OS PRESTADORES'] + sorted(df['NM_PRESTADOR_EXEC'].unique().tolist())[:50]
+        with col4:
+            # FILTRO DE PRESTADOR
+            df_filtro_prestador = df.copy()
+            
+            if competencia_selecionada != 'TODAS AS COMPETÊNCIAS':
+                df_filtro_prestador = df_filtro_prestador[df_filtro_prestador['MES_ANO_FORMATADO'] == competencia_selecionada]
+            
+            if tipo_selecionado != 'TODOS':
+                df_filtro_prestador = df_filtro_prestador[df_filtro_prestador['TP_PRESTADOR_CLASSIFICADO'] == tipo_selecionado]
+            
+            if municipio_selecionado != 'TODOS OS MUNICÍPIOS' and 'MUNICIPIO_PRESTADOR' in df_filtro_prestador.columns:
+                df_filtro_prestador = df_filtro_prestador[df_filtro_prestador['MUNICIPIO_PRESTADOR'] == municipio_selecionado]
+            
+            prestadores_disponiveis = sorted(df_filtro_prestador['NM_PRESTADOR_EXEC'].unique().tolist())
+            prestadores_opcoes = ['TODOS OS PRESTADORES'] + prestadores_disponiveis[:50]  # Limitar a 50
+            
             prestador_selecionado = st.selectbox(
-                "👨‍⚕️ Prestador",
-                prestadores,
-                key="filtro_prestador_basic"
+                "👨‍⚕️ Prestador:",
+                prestadores_opcoes,
+                index=0,
+                key="filtro_prestador"
             )
     
-    with filtro_tab2:
-        col_f5, col_f6, col_f7, col_f8 = st.columns(4)
-        
-        with col_f5:
-            # Procedimento
-            procedimentos = ['TODOS OS PROCEDIMENTOS'] + sorted(df['DS_PROCEDIMENTO'].unique().tolist())
-            procedimento_selecionado = st.selectbox(
-                "🩺 Procedimento",
-                procedimentos,
-                key="filtro_procedimento_advanced"
-            )
-        
-        with col_f6:
-            # Valor mínimo
-            valor_min = st.number_input(
-                "💰 Valor Mínimo (R$)",
-                min_value=float(df['VL_LIBERADO'].min()),
-                max_value=float(df['VL_LIBERADO'].max()),
-                value=float(df['VL_LIBERADO'].min()),
-                step=10.0,
-                key="filtro_valor_min_advanced"
-            )
-        
-        with col_f7:
-            # Valor máximo
-            valor_max = st.number_input(
-                "💰 Valor Máximo (R$)",
-                min_value=float(df['VL_LIBERADO'].min()),
-                max_value=float(df['VL_LIBERADO'].max()),
-                value=float(df['VL_LIBERADO'].max()),
-                step=10.0,
-                key="filtro_valor_max_advanced"
-            )
-        
-        with col_f8:
-            # Quantidade máxima
-            qt_max = st.number_input(
-                "📊 Máx. Diárias",
-                min_value=int(df['QT_ITEM'].min()),
-                max_value=int(df['QT_ITEM'].max()),
-                value=int(df['QT_ITEM'].max()),
-                step=1,
-                key="filtro_quantidade_advanced"
-            )
+    # Segunda linha de filtros
+    col5, col6, col7, col8 = st.columns(4)
     
-    # Botões de controle de filtros
+    with col5:
+        # FILTRO DE PROCEDIMENTO
+        df_filtro_procedimento = df.copy()
+        
+        if competencia_selecionada != 'TODAS AS COMPETÊNCIAS':
+            df_filtro_procedimento = df_filtro_procedimento[df_filtro_procedimento['MES_ANO_FORMATADO'] == competencia_selecionada]
+        
+        if tipo_selecionado != 'TODOS':
+            df_filtro_procedimento = df_filtro_procedimento[df_filtro_procedimento['TP_PRESTADOR_CLASSIFICADO'] == tipo_selecionado]
+        
+        if prestador_selecionado != 'TODOS OS PRESTADORES':
+            df_filtro_procedimento = df_filtro_procedimento[df_filtro_procedimento['NM_PRESTADOR_EXEC'] == prestador_selecionado]
+        
+        procedimentos_disponiveis = sorted(df_filtro_procedimento['DS_PROCEDIMENTO'].unique().tolist())
+        procedimentos_opcoes = ['TODOS OS PROCEDIMENTOS'] + procedimentos_disponiveis
+        
+        procedimento_selecionado = st.selectbox(
+            "🩺 Procedimento:",
+            procedimentos_opcoes,
+            index=0,
+            key="filtro_procedimento"
+        )
+    
+    with col6:
+        # FILTRO DE VALOR MÍNIMO
+        valor_min = float(df['VL_LIBERADO'].min())
+        valor_max = float(df['VL_LIBERADO'].max())
+        
+        valor_min_selecionado = st.number_input(
+            "💰 Valor Mínimo (R$):",
+            min_value=valor_min,
+            max_value=valor_max,
+            value=valor_min,
+            step=10.0,
+            key="filtro_valor_min"
+        )
+    
+    with col7:
+        # FILTRO DE VALOR MÁXIMO
+        valor_max_selecionado = st.number_input(
+            "💰 Valor Máximo (R$):",
+            min_value=valor_min,
+            max_value=valor_max,
+            value=valor_max,
+            step=10.0,
+            key="filtro_valor_max"
+        )
+    
+    with col8:
+        # FILTRO DE QUANTIDADE
+        qt_min = int(df['QT_ITEM'].min())
+        qt_max = int(df['QT_ITEM'].max())
+        
+        qt_max_selecionada = st.number_input(
+            "📊 Máx. Diárias:",
+            min_value=qt_min,
+            max_value=qt_max,
+            value=qt_max,
+            step=1,
+            key="filtro_quantidade_max"
+        )
+    
+    # Botões de controle
     col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
     with col_btn1:
         aplicar_filtros = st.button("✅ Aplicar Filtros", use_container_width=True, type="primary")
     with col_btn2:
-        if st.button("🔄 Resetar Filtros", use_container_width=True):
-            for key in list(st.session_state.keys()):
-                if key.startswith('filtro_'):
-                    del st.session_state[key]
+        if st.button("🔄 Atualizar Dados", use_container_width=True):
+            st.cache_data.clear()
             st.rerun()
     with col_btn3:
-        if st.button("📊 Exportar Dashboard", use_container_width=True):
-            st.session_state['exportar_dashboard'] = True
+        if st.button("🗑️ Limpar Filtros", use_container_width=True):
+            keys_to_remove = [k for k in st.session_state.keys() if k.startswith('filtro_')]
+            for key in keys_to_remove:
+                del st.session_state[key]
+            st.rerun()
     with col_btn4:
-        if st.button("📈 Gerar Relatório", use_container_width=True):
-            st.session_state['gerar_relatorio'] = True
+        exportar_clicked = st.button("📤 Exportar Excel", use_container_width=True, type="secondary")
     
     # ============================================
     # APLICAR FILTROS
     # ============================================
     df_filtrado = df.copy()
-    filtros_ativos = []
     
-    # Aplicar filtros básicos
+    filtros_info = []
+    
+    # Aplicar filtros sequencialmente
     if competencia_selecionada != 'TODAS AS COMPETÊNCIAS' and 'MES_ANO_FORMATADO' in df_filtrado.columns:
         df_filtrado = df_filtrado[df_filtrado['MES_ANO_FORMATADO'] == competencia_selecionada]
-        filtros_ativos.append(f"Competência: {competencia_selecionada}")
+        filtros_info.append(f"📅 {competencia_selecionada}")
     
     if tipo_selecionado != 'TODOS':
         df_filtrado = df_filtrado[df_filtrado['TP_PRESTADOR_CLASSIFICADO'] == tipo_selecionado]
-        filtros_ativos.append(f"Tipo: {tipo_selecionado}")
+        filtros_info.append(f"🏢 {tipo_selecionado}")
     
-    if municipio_selecionado != 'TODOS OS MUNICÍPIOS':
+    if municipio_selecionado != 'TODOS OS MUNICÍPIOS' and 'MUNICIPIO_PRESTADOR' in df_filtrado.columns:
         df_filtrado = df_filtrado[df_filtrado['MUNICIPIO_PRESTADOR'] == municipio_selecionado]
-        filtros_ativos.append(f"Município: {municipio_selecionado}")
+        filtros_info.append(f"📍 {municipio_selecionado}")
     
     if prestador_selecionado != 'TODOS OS PRESTADORES':
         df_filtrado = df_filtrado[df_filtrado['NM_PRESTADOR_EXEC'] == prestador_selecionado]
-        filtros_ativos.append(f"Prestador: {prestador_selecionado}")
+        filtros_info.append(f"👨‍⚕️ {prestador_selecionado[:20]}{'...' if len(prestador_selecionado) > 20 else ''}")
     
-    # Aplicar filtros avançados
     if procedimento_selecionado != 'TODOS OS PROCEDIMENTOS':
         df_filtrado = df_filtrado[df_filtrado['DS_PROCEDIMENTO'] == procedimento_selecionado]
-        filtros_ativos.append(f"Procedimento: {procedimento_selecionado}")
+        filtros_info.append(f"🩺 {procedimento_selecionado[:20]}{'...' if len(procedimento_selecionado) > 20 else ''}")
     
+    # Filtros numéricos
     df_filtrado = df_filtrado[
-        (df_filtrado['VL_LIBERADO'] >= valor_min) & 
-        (df_filtrado['VL_LIBERADO'] <= valor_max)
+        (df_filtrado['VL_LIBERADO'] >= valor_min_selecionado) & 
+        (df_filtrado['VL_LIBERADO'] <= valor_max_selecionado)
     ]
     
-    df_filtrado = df_filtrado[df_filtrado['QT_ITEM'] <= qt_max]
+    df_filtrado = df_filtrado[
+        (df_filtrado['QT_ITEM'] <= qt_max_selecionada)
+    ]
     
-    # Mostrar resumo dos filtros
-    if filtros_ativos:
+    # Mostrar filtros ativos
+    if filtros_info:
         st.markdown(f"""
-        <div class="status-info">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="info-card card-info">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div>
-                    <strong>🔧 Filtros Ativos:</strong> {', '.join(filtros_ativos)}
+                    <strong>🔧 Filtros Ativos:</strong> {' • '.join(filtros_info)}
                 </div>
                 <div>
-                    <strong>📊 Registros Filtrados:</strong> {formatar_inteiro_br(len(df_filtrado))}
+                    <strong>📊 Registros:</strong> {formatar_inteiro_br(len(df_filtrado))}
                 </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
     # ============================================
-    # KPI DASHBOARD
+    # KPIs PRINCIPAIS
     # ============================================
-    st.markdown("## 📈 Dashboard de Métricas")
+    st.markdown("## 📈 Métricas Principais")
     
     # Calcular métricas
     pacientes_unicos = df_filtrado['CD_BENEFICIARIO'].nunique()
@@ -1168,373 +1084,557 @@ def dashboard_principal():
     perc_local = (valor_local / valor_total * 100) if valor_total > 0 else 0
     perc_intercambio = (valor_intercambio / valor_total * 100) if valor_total > 0 else 0
     
-    # Layout de KPIs
-    kpi_col1, kpi_col2, kpi_col3, kpi_col4, kpi_col5 = st.columns(5)
+    # Layout de métricas
+    col_k1, col_k2, col_k3, col_k4, col_k5 = st.columns(5)
     
-    with kpi_col1:
-        st.metric(
-            label="👥 Pacientes Únicos",
-            value=formatar_inteiro_br(pacientes_unicos),
-            delta=f"{formatar_inteiro_br(total_diarias)} diárias",
-            delta_color="off"
-        )
+    with col_k1:
+        st.markdown(f"""
+        <div class="stMetric metric-pacientes">
+            <div data-testid="stMetricLabel">👥 Pacientes Únicos</div>
+            <div data-testid="stMetricValue">{formatar_inteiro_br(pacientes_unicos)}</div>
+            <div class="metric-subtext">
+                {formatar_inteiro_br(total_diarias)} diárias totais
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    with kpi_col2:
-        st.metric(
-            label="🏥 Local",
-            value=formatar_moeda_br(valor_local),
-            delta=f"{perc_local:.1f}% • {len(local_df)} reg",
-            delta_color="normal"
-        )
+    with col_k2:
+        st.markdown(f"""
+        <div class="stMetric metric-local">
+            <div data-testid="stMetricLabel">🏥 Local</div>
+            <div data-testid="stMetricValue">{formatar_moeda_br(valor_local)}</div>
+            <div class="metric-subtext">
+                {formatar_inteiro_br(len(local_df))} reg • {perc_local:.1f}%
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    with kpi_col3:
-        st.metric(
-            label="🌐 Intercâmbio",
-            value=formatar_moeda_br(valor_intercambio),
-            delta=f"{perc_intercambio:.1f}% • {len(intercambio_df)} reg",
-            delta_color="normal"
-        )
+    with col_k3:
+        st.markdown(f"""
+        <div class="stMetric metric-intercambio">
+            <div data-testid="stMetricLabel">🌐 Intercâmbio</div>
+            <div data-testid="stMetricValue">{formatar_moeda_br(valor_intercambio)}</div>
+            <div class="metric-subtext">
+                {formatar_inteiro_br(len(intercambio_df))} reg • {perc_intercambio:.1f}%
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    with kpi_col4:
-        st.metric(
-            label="💰 Valor Total",
-            value=formatar_moeda_br(valor_total),
-            delta=f"Média: {formatar_moeda_br(valor_medio)}",
-            delta_color="off"
-        )
+    with col_k4:
+        st.markdown(f"""
+        <div class="stMetric metric-total">
+            <div data-testid="stMetricLabel">💰 Valor Total</div>
+            <div data-testid="stMetricValue">{formatar_moeda_br(valor_total)}</div>
+            <div class="metric-subtext">
+                Média: {formatar_moeda_br(valor_medio)}/diária
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    with kpi_col5:
+    with col_k5:
         media_por_paciente = valor_total / pacientes_unicos if pacientes_unicos > 0 else 0
-        st.metric(
-            label="📊 Média/Paciente",
-            value=formatar_moeda_br(media_por_paciente),
-            delta=f"{(total_diarias/pacientes_unicos):.1f} diárias/paciente",
-            delta_color="off"
-        )
+        st.markdown(f"""
+        <div class="stMetric metric-media">
+            <div data-testid="stMetricLabel">📊 Média/Paciente</div>
+            <div data-testid="stMetricValue">{formatar_moeda_br(media_por_paciente)}</div>
+            <div class="metric-subtext">
+                Diárias/paciente: {(total_diarias/pacientes_unicos):.1f}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     # ============================================
-    # VISUALIZAÇÕES GRÁFICAS
+    # GRÁFICO 1: EVOLUÇÃO TEMPORAL
     # ============================================
-    st.markdown("## 📊 Visualizações Analíticas")
+    st.markdown("---")
+    st.markdown("## 📈 Evolução Temporal")
     
-    # Configurações de tema para gráficos
-    plotly_template = "plotly_dark" if st.session_state.tema == "dark" else "plotly_white"
-    
-    # Container de gráficos com tabs
-    grafico_tab1, grafico_tab2, grafico_tab3 = st.tabs(["📈 Evolução Temporal", "🏢 Análise por Tipo", "🏆 Ranking e Distribuição"])
-    
-    with grafico_tab1:
-        if 'MES_ANO_FORMATADO' in df_filtrado.columns and df_filtrado['MES_ANO_FORMATADO'].nunique() > 1:
-            col_g1, col_g2 = st.columns(2)
-            
-            with col_g1:
-                # Evolução do valor total
-                evolucao_valor = df_filtrado.groupby('MES_ANO_FORMATADO').agg({
-                    'VL_LIBERADO': 'sum',
-                    'CD_BENEFICIARio': 'nunique'
-                }).resetindex()
-                
-                evolucao_valor = criar_categoria_ordenada(evolucao_valor, 'MES_ANO_FORMATADO')
-                
-                fig_evolucao = px.line(
-                    evolucao_valor,
-                    x='MES_ANO_FORMATADO',
-                    y='VL_LIBERADO',
-                    title='📈 Evolução do Valor Total por Competência',
-                    labels={'VL_LIBERADO': 'Valor Total (R$)', 'MES_ANO_FORMATADO': 'Competência'},
-                    markers=True,
-                    template=plotly_template
-                )
-                st.plotly_chart(fig_evolucao, use_container_width=True)
-            
-            with col_g2:
-                # Evolução de pacientes
-                fig_pacientes = px.line(
-                    evolucao_valor,
-                    x='MES_ANO_FORMATADO',
-                    y='CD_BENEFICIARIO',
-                    title='👥 Evolução de Pacientes Únicos',
-                    labels={'CD_BENEFICIARIO': 'Pacientes Únicos', 'MES_ANO_FORMATADO': 'Competência'},
-                    markers=True,
-                    template=plotly_template,
-                    line_shape='spline'
-                )
-                st.plotly_chart(fig_pacientes, use_container_width=True)
-        else:
-            st.info("ℹ️ Dados insuficientes para análise temporal")
-    
-    with grafico_tab2:
-        col_g3, col_g4 = st.columns(2)
-        
-        with col_g3:
-            # Distribuição por tipo
-            tipo_dist = df_filtrado.groupby('TP_PRESTADOR_CLASSIFICADO').agg({
-                'VL_LIBERADO': 'sum',
-                'CD_BENEFICIARIO': 'nunique'
-            }).reset_index()
-            
-            fig_tipo = px.pie(
-                tipo_dist,
-                values='VL_LIBERADO',
-                names='TP_PRESTADOR_CLASSIFICADO',
-                title='🏢 Distribuição de Valor por Tipo',
-                hole=0.4,
-                color_discrete_sequence=['#22c55e', '#3b82f6'],
-                template=plotly_template
-            )
-            st.plotly_chart(fig_tipo, use_container_width=True)
-        
-        with col_g4:
-            # Distribuição por município (top 10)
-            munic_dist = df_filtrado.groupby('MUNICIPIO_PRESTADOR').agg({
-                'VL_LIBERADO': 'sum'
-            }).reset_index().nlargest(10, 'VL_LIBERADO')
-            
-            fig_munic = px.bar(
-                munic_dist,
-                x='VL_LIBERADO',
-                y='MUNICIPIO_PRESTADOR',
-                orientation='h',
-                title='📍 Top 10 Municípios por Valor',
-                labels={'VL_LIBERADO': 'Valor (R$)', 'MUNICIPIO_PRESTADOR': 'Município'},
-                template=plotly_template
-            )
-            st.plotly_chart(fig_munic, use_container_width=True)
-    
-    with grafico_tab3:
-        col_g5, col_g6 = st.columns(2)
-        
-        with col_g5:
-            # Top 10 prestadores
-            top_prestadores = df_filtrado.groupby('NM_PRESTADOR_EXEC').agg({
-                'VL_LIBERADO': 'sum',
-                'TP_PRESTADOR_CLASSIFICADO': 'first'
-            }).reset_index().nlargest(10, 'VL_LIBERADO')
-            
-            fig_top = px.bar(
-                top_prestadores,
-                x='VL_LIBERADO',
-                y='NM_PRESTADOR_EXEC',
-                color='TP_PRESTADOR_CLASSIFICADO',
-                orientation='h',
-                title='🏆 Top 10 Prestadores por Valor',
-                labels={'VL_LIBERADO': 'Valor (R$)', 'NM_PRESTADOR_EXEC': 'Prestador'},
-                color_discrete_map={'LOCAL': '#22c55e', 'INTERCÂMBIO': '#3b82f6'},
-                template=plotly_template
-            )
-            st.plotly_chart(fig_top, use_container_width=True)
-        
-        with col_g6:
-            # Scatter plot: valor vs pacientes
-            scatter_data = df_filtrado.groupby(['NM_PRESTADOR_EXEC', 'TP_PRESTADOR_CLASSIFICADO']).agg({
-                'VL_LIBERADO': 'sum',
-                'CD_BENEFICIARIO': 'nunique'
-            }).reset_index()
-            
-            fig_scatter = px.scatter(
-                scatter_data,
-                x='CD_BENEFICIARIO',
-                y='VL_LIBERADO',
-                color='TP_PRESTADOR_CLASSIFICADO',
-                size='VL_LIBERADO',
-                hover_name='NM_PRESTADOR_EXEC',
-                title='📈 Relação: Pacientes vs Valor',
-                labels={'CD_BENEFICIARIO': 'Pacientes Únicos', 'VL_LIBERADO': 'Valor Total (R$)'},
-                color_discrete_map={'LOCAL': '#22c55e', 'INTERCÂMBIO': '#3b82f6'},
-                template=plotly_template
-            )
-            st.plotly_chart(fig_scatter, use_container_width=True)
-    
-    # ============================================
-    # TABELAS DETALHADAS
-    # ============================================
-    st.markdown("## 📋 Tabelas Detalhadas")
-    
-    tabela_tab1, tabela_tab2, tabela_tab3 = st.tabs(["🏥 Ranking Completo", "🩺 Análise por Procedimento", "📊 Dados Brutos"])
-    
-    with tabela_tab1:
-        # Ranking de prestadores
-        ranking = df_filtrado.groupby(['NM_PRESTADOR_EXEC', 'TP_PRESTADOR_CLASSIFICADO', 'MUNICIPIO_PRESTADOR']).agg({
-            'VL_LIBERADO': ['sum', 'mean'],
+    if 'MES_ANO_FORMATADO' in df_filtrado.columns and df_filtrado['MES_ANO_FORMATADO'].nunique() > 1:
+        analise_temporal = df_filtrado.groupby(['ANO_COMP', 'MES_COMP', 'MES_ANO_FORMATADO']).agg({
+            'VL_LIBERADO': 'sum',
             'CD_BENEFICIARIO': 'nunique',
             'QT_ITEM': 'sum'
         }).reset_index()
         
-        ranking.columns = ['Prestador', 'Tipo', 'Município', 'Valor Total', 'Valor Médio', 'Pacientes Únicos', 'Total Diárias']
-        ranking = ranking.sort_values('Valor Total', ascending=False)
-        ranking['Posição'] = range(1, len(ranking) + 1)
+        # Ordenar cronologicamente
+        analise_temporal = analise_temporal.sort_values(['ANO_COMP', 'MES_COMP'])
+        analise_temporal = criar_categoria_ordenada(analise_temporal, 'MES_ANO_FORMATADO')
+        
+        col_t1, col_t2 = st.columns(2)
+        
+        with col_t1:
+            # Gráfico de linha - Evolução do valor
+            fig_evolucao = px.line(
+                analise_temporal,
+                x='MES_ANO_FORMATADO',
+                y='VL_LIBERADO',
+                title='📈 Evolução do Valor Total por Competência',
+                labels={'VL_LIBERADO': 'Valor Total (R$)', 'MES_ANO_FORMATADO': 'Competência'},
+                markers=True,
+                line_shape='spline',
+                height=400
+            )
+            
+            fig_evolucao.update_traces(
+                line=dict(color='#3b82f6', width=3),
+                marker=dict(size=8, color='#22c55e')
+            )
+            
+            fig_evolucao.update_layout(
+                xaxis_tickangle=-45
+            )
+            
+            fig_evolucao.update_yaxes(
+                tickprefix="R$ ",
+                tickformat=",.2f"
+            )
+            
+            st.plotly_chart(fig_evolucao, use_container_width=True)
+        
+        with col_t2:
+            # Gráfico de barras - Distribuição por tipo
+            analise_tipo_temporal = df_filtrado.groupby(['MES_ANO_FORMATADO', 'TP_PRESTADOR_CLASSIFICADO']).agg({
+                'VL_LIBERADO': 'sum'
+            }).reset_index()
+            
+            analise_tipo_temporal = criar_categoria_ordenada(analise_tipo_temporal, 'MES_ANO_FORMATADO')
+            
+            fig_tipo_temporal = px.bar(
+                analise_tipo_temporal,
+                x='MES_ANO_FORMATADO',
+                y='VL_LIBERADO',
+                color='TP_PRESTADOR_CLASSIFICADO',
+                title='🏢 Distribuição Local vs Intercâmbio',
+                labels={'VL_LIBERADO': 'Valor (R$)', 'MES_ANO_FORMATADO': 'Competência'},
+                color_discrete_map={'LOCAL': '#22c55e', 'INTERCÂMBIO': '#3b82f6'},
+                barmode='group',
+                height=400
+            )
+            
+            fig_tipo_temporal.update_layout(
+                xaxis_tickangle=-45
+            )
+            
+            fig_tipo_temporal.update_yaxes(
+                tickprefix="R$ ",
+                tickformat=",.2f"
+            )
+            
+            st.plotly_chart(fig_tipo_temporal, use_container_width=True)
+    else:
+        st.info("ℹ️ Dados insuficientes para análise temporal")
+    
+    # ============================================
+    # GRÁFICO 2: ANÁLISE POR PROCEDIMENTO
+    # ============================================
+    st.markdown("## 🩺 Análise por Tipo de Diária")
+    
+    analise_procedimento = df_filtrado.groupby('DS_PROCEDIMENTO').agg({
+        'VL_LIBERADO': 'sum',
+        'CD_BENEFICIARIO': 'nunique',
+        'QT_ITEM': 'sum'
+    }).reset_index().sort_values('VL_LIBERADO', ascending=False)
+    
+    col_g3, col_g4 = st.columns(2)
+    
+    with col_g3:
+        # Treemap de procedimentos
+        fig_treemap = px.treemap(
+            analise_procedimento,
+            path=['DS_PROCEDIMENTO'],
+            values='VL_LIBERADO',
+            title='🌳 Distribuição de Valor por Procedimento',
+            color='VL_LIBERADO',
+            color_continuous_scale='Greens',
+            hover_data=['CD_BENEFICIARIO', 'QT_ITEM'],
+            height=500
+        )
+        
+        fig_treemap.update_traces(
+            hovertemplate="<b>%{label}</b><br>Valor: R$ %{value:,.2f}<br>Pacientes: %{customdata[0]}<br>Diárias: %{customdata[1]}"
+        )
+        
+        st.plotly_chart(fig_treemap, use_container_width=True)
+    
+    with col_g4:
+        # Gráfico de barras horizontal (Top 10)
+        analise_procedimento_top10 = analise_procedimento.head(10)
+        
+        fig_barras_proc = px.bar(
+            analise_procedimento_top10,
+            x='VL_LIBERADO',
+            y='DS_PROCEDIMENTO',
+            orientation='h',
+            title='📊 Top 10 Procedimentos por Valor',
+            color='VL_LIBERADO',
+            color_continuous_scale='Viridis',
+            text='VL_LIBERADO',
+            height=500,
+            hover_data=['CD_BENEFICIARIO', 'QT_ITEM']
+        )
+        
+        fig_barras_proc.update_traces(
+            texttemplate='R$ %{text:,.2f}',
+            textposition='outside',
+            hovertemplate='<b>%{y}</b><br>Valor: R$ %{x:,.2f}<br>Pacientes: %{customdata[0]}<br>Diárias: %{customdata[1]}'
+        )
+        
+        fig_barras_proc.update_layout(
+            yaxis={'categoryorder': 'total ascending'},
+            coloraxis_showscale=False,
+            xaxis=dict(
+                tickprefix="R$ ",
+                tickformat=",.2f"
+            )
+        )
+        
+        st.plotly_chart(fig_barras_proc, use_container_width=True)
+    
+    # ============================================
+    # GRÁFICO 3: RANKING DE PRESTADORES
+    # ============================================
+    st.markdown("## 🏆 Ranking de Prestadores")
+    
+    ranking = df_filtrado.groupby(['NM_PRESTADOR_EXEC', 'TP_PRESTADOR_CLASSIFICADO']).agg({
+        'CD_BENEFICIARIO': 'nunique',
+        'VL_LIBERADO': 'sum',
+        'QT_ITEM': 'sum'
+    }).reset_index()
+    
+    ranking['Valor Médio'] = ranking['VL_LIBERADO'] / ranking['QT_ITEM']
+    ranking = ranking.sort_values('VL_LIBERADO', ascending=False)
+    ranking['Pos'] = range(1, len(ranking) + 1)
+    
+    # Top 10 prestadores
+    top_10 = ranking.head(10)
+    
+    col_g5, col_g6 = st.columns(2)
+    
+    with col_g5:
+        # Gráfico de barras horizontais
+        fig_barras = px.bar(
+            top_10,
+            x='VL_LIBERADO',
+            y='NM_PRESTADOR_EXEC',
+            orientation='h',
+            title='🏅 Top 10 Prestadores por Valor',
+            color='TP_PRESTADOR_CLASSIFICADO',
+            color_discrete_map={'LOCAL': '#22c55e', 'INTERCÂMBIO': '#3b82f6'},
+            text='VL_LIBERADO',
+            height=500,
+            hover_data=['CD_BENEFICIARIO']
+        )
+        
+        fig_barras.update_traces(
+            texttemplate='R$ %{text:,.2f}',
+            textposition='outside',
+            hovertemplate='<b>%{y}</b><br>Valor: R$ %{x:,.2f}<br>Pacientes: %{customdata[0]}<br>Tipo: %{marker.color}'
+        )
+        
+        fig_barras.update_layout(
+            yaxis={'categoryorder': 'total ascending'},
+            showlegend=True,
+            legend_title_text='Tipo',
+            xaxis=dict(
+                tickprefix="R$ ",
+                tickformat=",.2f"
+            )
+        )
+        
+        st.plotly_chart(fig_barras, use_container_width=True)
+    
+    with col_g6:
+        # Scatter plot: Valor vs Pacientes
+        fig_scatter = px.scatter(
+            top_10,
+            x='CD_BENEFICIARIO',
+            y='VL_LIBERADO',
+            size='QT_ITEM',
+            color='TP_PRESTADOR_CLASSIFICADO',
+            title='📈 Relação: Pacientes vs Valor Total',
+            labels={
+                'CD_BENEFICIARIO': 'Pacientes Únicos',
+                'VL_LIBERADO': 'Valor Total (R$)',
+                'TP_PRESTADOR_CLASSIFICADO': 'Tipo',
+                'QT_ITEM': 'Diárias'
+            },
+            hover_name='NM_PRESTADOR_EXEC',
+            size_max=60,
+            height=500,
+            color_discrete_map={'LOCAL': '#22c55e', 'INTERCÂMBIO': '#3b82f6'}
+        )
+        
+        fig_scatter.update_traces(
+            marker=dict(line=dict(width=1, color='DarkSlateGrey')),
+            hovertemplate='<b>%{hovertext}</b><br>Pacientes: %{x}<br>Valor: R$ %{y:,.2f}<br>Diárias: %{marker.size}<br>Tipo: %{marker.color}'
+        )
+        
+        fig_scatter.update_layout(
+            showlegend=True,
+            legend_title_text='Tipo',
+            xaxis_title='Número de Pacientes Únicos',
+            yaxis=dict(
+                tickprefix="R$ ",
+                tickformat=",.2f"
+            )
+        )
+        
+        st.plotly_chart(fig_scatter, use_container_width=True)
+    
+    # ============================================
+    # TABELAS DETALHADAS
+    # ============================================
+    st.markdown("---")
+    st.markdown("## 📋 Tabelas Detalhadas")
+    
+    tab1, tab2, tab3 = st.tabs(["🏥 Ranking Completo", "🩺 Detalhes por Procedimento", "📊 Resumo por Competência"])
+    
+    with tab1:
+        # Tabela ranking prestadores formatada
+        ranking_formatado = ranking.copy()
+        
+        # Aplicar formatação brasileira
+        ranking_formatado['VL_LIBERADO'] = ranking_formatado['VL_LIBERADO'].apply(formatar_moeda_br)
+        ranking_formatado['CD_BENEFICIARIO'] = ranking_formatado['CD_BENEFICIARIO'].apply(formatar_inteiro_br)
+        ranking_formatado['QT_ITEM'] = ranking_formatado['QT_ITEM'].apply(formatar_inteiro_br)
+        ranking_formatado['Valor Médio'] = ranking_formatado['Valor Médio'].apply(formatar_moeda_br)
         
         st.dataframe(
-            ranking[['Posição', 'Prestador', 'Tipo', 'Município', 'Valor Total', 'Pacientes Únicos', 'Total Diárias']],
+            ranking_formatado[['Pos', 'NM_PRESTADOR_EXEC', 'TP_PRESTADOR_CLASSIFICADO', 
+                              'VL_LIBERADO', 'CD_BENEFICIARIO', 'Valor Médio']],
             use_container_width=True,
-            height=400
+            height=400,
+            column_config={
+                'Pos': 'Posição',
+                'NM_PRESTADOR_EXEC': 'Prestador',
+                'TP_PRESTADOR_CLASSIFICADO': 'Tipo',
+                'VL_LIBERADO': 'Valor Total',
+                'CD_BENEFICIARIO': 'Pacientes',
+                'Valor Médio': 'Média/Diária'
+            }
         )
+        
+        # Estatísticas da tabela
+        col_stats1, col_stats2, col_stats3, col_stats4 = st.columns(4)
+        with col_stats1:
+            st.metric("Total Prestadores", formatar_inteiro_br(len(ranking)))
+        with col_stats2:
+            st.metric("Média Valor", formatar_moeda_br(ranking['VL_LIBERADO'].mean()))
+        with col_stats3:
+            st.metric("Mediana Valor", formatar_moeda_br(ranking['VL_LIBERADO'].median()))
+        with col_stats4:
+            st.metric("Desvio Padrão", formatar_moeda_br(ranking['VL_LIBERADO'].std()))
     
-    with tabela_tab2:
-        # Análise por procedimento
-        proc_analise = df_filtrado.groupby('DS_PROCEDIMENTO').agg({
+    with tab2:
+        # Tabela procedimentos formatada
+        tabela_procedimentos = df_filtrado.groupby('DS_PROCEDIMENTO').agg({
             'VL_LIBERADO': ['sum', 'mean', 'count'],
             'CD_BENEFICIARIO': 'nunique',
             'QT_ITEM': 'sum'
         }).reset_index()
         
-        proc_analise.columns = ['Procedimento', 'Valor Total', 'Valor Médio', 'Qtd Registros', 'Pacientes Únicos', 'Total Diárias']
-        proc_analise = proc_analise.sort_values('Valor Total', ascending=False)
+        tabela_procedimentos.columns = [
+            'Procedimento', 
+            'Valor Total', 
+            'Valor Médio', 
+            'Qtde Registros',
+            'Pacientes Únicos',
+            'Total Diárias'
+        ]
+        
+        tabela_procedimentos = tabela_procedimentos.sort_values('Valor Total', ascending=False)
+        
+        tabela_formatada = tabela_procedimentos.copy()
+        tabela_formatada['Valor Total'] = tabela_formatada['Valor Total'].apply(formatar_moeda_br)
+        tabela_formatada['Valor Médio'] = tabela_formatada['Valor Médio'].apply(formatar_moeda_br)
+        tabela_formatada['Qtde Registros'] = tabela_formatada['Qtde Registros'].apply(formatar_inteiro_br)
+        tabela_formatada['Pacientes Únicos'] = tabela_formatada['Pacientes Únicos'].apply(formatar_inteiro_br)
+        tabela_formatada['Total Diárias'] = tabela_formatada['Total Diárias'].apply(formatar_inteiro_br)
         
         st.dataframe(
-            proc_analise,
+            tabela_formatada,
             use_container_width=True,
             height=400
         )
     
-    with tabela_tab3:
-        # Dados brutos filtrados
-        colunas_disponiveis = list(df_filtrado.columns)
-        colunas_selecionadas = st.multiselect(
-            "Selecione colunas para visualizar:",
-            colunas_disponiveis,
-            default=colunas_disponiveis[:8] if len(colunas_disponiveis) > 8 else colunas_disponiveis
-        )
-        
-        if colunas_selecionadas:
+    with tab3:
+        # Tabela competências (se disponível)
+        if 'MES_ANO_FORMATADO' in df_filtrado.columns:
+            tabela_competencia = df_filtrado.groupby('MES_ANO_FORMATADO').agg({
+                'VL_LIBERADO': 'sum',
+                'CD_BENEFICIARIO': 'nunique',
+                'QT_ITEM': 'sum',
+                'NM_PRESTADOR_EXEC': 'nunique',
+                'DS_PROCEDIMENTO': 'nunique'
+            }).reset_index()
+            
+            # Ordenar por competência (cronologicamente)
+            tabela_competencia['ORDEM'] = tabela_competencia['MES_ANO_FORMATADO'].apply(
+                lambda x: (int(x.split('/')[1]), obter_numero_mes(x.split('/')[0])) if '/' in x else (9999, 13)
+            )
+            tabela_competencia = tabela_competencia.sort_values('ORDEM')
+            tabela_competencia = tabela_competencia.drop(columns=['ORDEM'])
+            
+            tabela_competencia.columns = ['Competência', 'Valor Total', 'Pacientes Únicos', 
+                                          'Total Diárias', 'Prestadores Únicos', 'Procedimentos Únicos']
+            
+            tabela_formatada = tabela_competencia.copy()
+            tabela_formatada['Valor Total'] = tabela_formatada['Valor Total'].apply(formatar_moeda_br)
+            tabela_formatada['Pacientes Únicos'] = tabela_formatada['Pacientes Únicos'].apply(formatar_inteiro_br)
+            tabela_formatada['Total Diárias'] = tabela_formatada['Total Diárias'].apply(formatar_inteiro_br)
+            tabela_formatada['Prestadores Únicos'] = tabela_formatada['Prestadores Únicos'].apply(formatar_inteiro_br)
+            tabela_formatada['Procedimentos Únicos'] = tabela_formatada['Procedimentos Únicos'].apply(formatar_inteiro_br)
+            
             st.dataframe(
-                df_filtrado[colunas_selecionadas].head(100),
+                tabela_formatada,
                 use_container_width=True,
                 height=400
             )
         else:
-            st.info("Selecione pelo menos uma coluna para visualizar os dados.")
+            st.info("ℹ️ Dados de competência não disponíveis")
     
     # ============================================
-    # EXPORTAÇÃO DE DADOS
+    # EXPORTAÇÃO EM EXCEL
     # ============================================
-    if st.session_state.get('exportar_dashboard', False):
+    if exportar_clicked:
         st.markdown("---")
-        st.markdown("## 📤 Exportar Dados")
+        st.markdown("## 📤 Exportar Dados em Excel")
         
-        exp_col1, exp_col2, exp_col3 = st.columns(3)
+        col_e1, col_e2 = st.columns(2)
         
-        with exp_col1:
-            # Exportar CSV
-            csv_data = df_filtrado.to_csv(index=False, sep=';', decimal=',', encoding='utf-8-sig')
-            st.download_button(
-                label="💾 Baixar CSV",
-                data=csv_data,
-                file_name=f"dados_unimed_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-        
-        with exp_col2:
-            # Exportar Excel
+        with col_e1:
+            # Exportar Excel com múltiplas abas
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                # Dados filtrados
                 df_filtrado.to_excel(writer, sheet_name='Dados Filtrados', index=False)
                 
-                # Adicionar resumo
+                # Ranking
+                ranking.to_excel(writer, sheet_name='Ranking Prestadores', index=False)
+                
+                # Análise por procedimento
+                tabela_procedimentos.to_excel(writer, sheet_name='Análise Procedimentos', index=False)
+                
+                # Análise temporal (se disponível)
+                if 'MES_ANO_FORMATADO' in df_filtrado.columns:
+                    tabela_competencia_raw = df_filtrado.groupby('MES_ANO_FORMATADO').agg({
+                        'VL_LIBERADO': 'sum',
+                        'CD_BENEFICIARIO': 'nunique',
+                        'QT_ITEM': 'sum'
+                    }).reset_index()
+                    tabela_competencia_raw.to_excel(writer, sheet_name='Análise Temporal', index=False)
+                
+                # Resumo executivo
                 resumo_df = pd.DataFrame({
-                    'Métrica': ['Registros', 'Pacientes Únicos', 'Valor Total', 'Total Diárias', 'Valor Médio'],
+                    'Métrica': ['Registros Filtrados', 'Pacientes Únicos', 'Valor Total', 
+                               'Total Diárias', 'Valor Médio por Diária', 'Valor Local',
+                               'Valor Intercâmbio', 'Percentual Local', 'Percentual Intercâmbio'],
                     'Valor': [
                         len(df_filtrado),
                         pacientes_unicos,
                         valor_total,
                         total_diarias,
-                        valor_medio
+                        valor_medio,
+                        valor_local,
+                        valor_intercambio,
+                        f"{perc_local:.1f}%",
+                        f"{perc_intercambio:.1f}%"
                     ]
                 })
-                resumo_df.to_excel(writer, sheet_name='Resumo', index=False)
+                resumo_df.to_excel(writer, sheet_name='Resumo Executivo', index=False)
+                
+                # Formatar números no Excel
+                workbook = writer.book
+                money_format = workbook.add_format({'num_format': 'R$ #,##0.00'})
+                int_format = workbook.add_format({'num_format': '#,##0'})
+                percent_format = workbook.add_format({'num_format': '0.0%"'})
+                
+                # Aplicar formatação
+                for sheet_name in writer.sheets:
+                    worksheet = writer.sheets[sheet_name]
+                    if sheet_name == 'Dados Filtrados':
+                        # Encontrar coluna VL_LIBERADO
+                        for i, col in enumerate(df_filtrado.columns):
+                            if 'VL_' in col or 'VALOR' in col.upper():
+                                worksheet.set_column(i, i, 15, money_format)
+                            elif col in ['QT_ITEM', 'CD_BENEFICIARIO']:
+                                worksheet.set_column(i, i, 12, int_format)
+                    
+                    elif sheet_name == 'Ranking Prestadores':
+                        worksheet.set_column(2, 2, 20, money_format)  # VL_LIBERADO
+                        worksheet.set_column(5, 5, 15, money_format)  # Valor Médio
+                        worksheet.set_column(3, 3, 12, int_format)   # CD_BENEFICIARIO
+                        worksheet.set_column(4, 4, 12, int_format)   # QT_ITEM
+                    
+                    elif sheet_name == 'Resumo Executivo':
+                        worksheet.set_column(1, 1, 25)  # Coluna Valor
             
             output.seek(0)
             
             st.download_button(
-                label="📊 Baixar Excel",
+                label="📊 Baixar Excel Completo",
                 data=output,
                 file_name=f"dashboard_unimed_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True
             )
         
-        with exp_col3:
-            # Relatório executivo
+        with col_e2:
+            # Relatório executivo em texto
             relatorio = f"""
             RELATÓRIO EXECUTIVO - DASHBOARD UNIMED
-            ===========================================
+            ==========================================
             
-            DATA: {datetime.now().strftime('%d/%m/%Y %H:%M')}
-            DESENVOLVEDOR: {DESENVOLVEDOR}
-            VERSÃO: {VERSAO}
-            LINK: {LINK_ACESSO}
+            📅 Período: {PERIODO_BASE}
+            🕐 Data geração: {datetime.now().strftime('%d/%m/%Y %H:%M')}
+            👨‍💻 Gerado por: {DESENVOLVEDOR}
             
-            RESUMO EXECUTIVO:
-            • Registros analisados: {formatar_inteiro_br(len(df_filtrado))}
-            • Pacientes únicos: {formatar_inteiro_br(pacientes_unicos)}
-            • Valor total: {formatar_moeda_br(valor_total)}
-            • Total de diárias: {formatar_inteiro_br(total_diarias)}
-            • Valor médio por diária: {formatar_moeda_br(valor_medio)}
+            📊 MÉTRICAS PRINCIPAIS:
+            • Registros Filtrados: {formatar_inteiro_br(len(df_filtrado))}
+            • Pacientes Únicos: {formatar_inteiro_br(pacientes_unicos)}
+            • Total de Diárias: {formatar_inteiro_br(total_diarias)}
+            • Valor Total: {formatar_moeda_br(valor_total)}
+            • Valor Médio por Diária: {formatar_moeda_br(valor_medio)}
             
-            DISTRIBUIÇÃO LOCAL/INTERCÂMBIO:
+            🏥 DISTRIBUIÇÃO LOCAL/INTERCÂMBIO:
             • Local: {formatar_moeda_br(valor_local)} ({perc_local:.1f}%)
             • Intercâmbio: {formatar_moeda_br(valor_intercambio)} ({perc_intercambio:.1f}%)
             
-            FILTROS APLICADOS:
-            {chr(10).join(['• ' + f for f in filtros_ativos]) if filtros_ativos else '• Nenhum filtro aplicado'}
+            🔧 FILTROS APLICADOS:
+            {', '.join(filtros_info) if filtros_info else 'Nenhum filtro aplicado'}
             
-            TOP 5 PRESTADORES:
+            📈 TOP 5 PRESTADORES:
             """
             
             for i, row in ranking.head(5).iterrows():
-                relatorio += f"\n{i+1}. {row['Prestador']}: {formatar_moeda_br(row['Valor Total'])}"
+                relatorio += f"\n{i+1}. {row['NM_PRESTADOR_EXEC']}: {formatar_moeda_br(row['VL_LIBERADO'])}"
+            
+            relatorio += f"""
+            
+            📋 RESUMO:
+            • Prestadores únicos: {formatar_inteiro_br(df_filtrado['NM_PRESTADOR_EXEC'].nunique())}
+            • Procedimentos únicos: {formatar_inteiro_br(df_filtrado['DS_PROCEDIMENTO'].nunique())}
+            """
             
             st.download_button(
-                label="📝 Baixar Relatório",
+                label="📝 Baixar Relatório (TXT)",
                 data=relatorio,
-                file_name=f"relatorio_executivo_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
+                file_name=f"relatorio_unimed_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
                 mime="text/plain",
                 use_container_width=True
             )
-        
-        st.session_state['exportar_dashboard'] = False
     
     # ============================================
-    # RODAPÉ AVANÇADO
+    # RODAPÉ
     # ============================================
     st.markdown("---")
-    
-    rodape_col1, rodape_col2, rodape_col3 = st.columns(3)
-    
-    with rodape_col1:
-        st.markdown(f"""
-        <div style="color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; font-size: 11px;">
-            <p><strong>🏥 Dashboard Unimed</strong></p>
-            <p>Versão: {VERSAO}</p>
-            <p>Desenvolvedor: {DESENVOLVEDOR}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with rodape_col2:
-        st.markdown(f"""
-        <div style="color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; font-size: 11px; text-align: center;">
-            <p><strong>📊 Estatísticas da Sessão</strong></p>
-            <p>Registros: {formatar_inteiro_br(len(df_filtrado))}</p>
-            <p>Valor Total: {formatar_moeda_br(valor_total)}</p>
-            <p>Atualizado: {datetime.now().strftime('%H:%M:%S')}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with rodape_col3:
-        st.markdown(f"""
-        <div style="color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; font-size: 11px; text-align: right;">
-            <p><strong>🌐 Informações Técnicas</strong></p>
-            <p>Streamlit Cloud Edition</p>
-            <p>Tema: {st.session_state.tema.title()}</p>
-            <p>Cache: Ativo (1 hora)</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
     st.markdown(f"""
-    <div style="text-align: center; color: {'#475569' if st.session_state.tema == 'dark' else '#cbd5e1'}; font-size: 10px; padding-top: 10px; border-top: 1px solid {'#334155' if st.session_state.tema == 'dark' else '#e2e8f0'};">
-        <p>© 2024 Unimed • Dashboard de Diárias Hospitalares • Acesso seguro via autenticação corporativa</p>
-        <p>{LINK_ACESSO} • Última atualização: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</p>
+    <div style="text-align: center; color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; font-size: 12px; padding: 20px;">
+        <p>🏥 <strong>Dashboard Unimed - Diárias Hospitalares</strong> | v{VERSAO}</p>
+        <p>📅 {PERIODO_BASE} | 👨‍💻 {DESENVOLVEDOR}</p>
+        <p>📊 {formatar_inteiro_br(len(df_filtrado))} registros | 💰 {formatar_moeda_br(valor_total)}</p>
+        <p>🏥 Local: {formatar_moeda_br(valor_local)} ({perc_local:.1f}%) | 🌐 Intercâmbio: {formatar_moeda_br(valor_intercambio)} ({perc_intercambio:.1f}%)</p>
+        <p>🕐 {datetime.now().strftime('%d/%m/%Y %H:%M:%S')} | 🌓 Tema: {st.session_state.tema.title()}</p>
     </div>
     """, unsafe_allow_html=True)
 
