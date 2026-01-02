@@ -195,39 +195,66 @@ def alternar_tema():
 # ============================================
 def classificar_prestador_local_intercambio(df):
     """
-    Classifica prestadores como LOCAL ou INTERCÂMBIO com base no nome do prestador
-    Retorna DataFrame com coluna 'TP_PRESTADOR_CLASSIFICADO'
+    Classifica prestadores como LOCAL ou INTERCÂMBIO com base na lógica completa:
+    1. Se tem coluna TP_PRESTADOR_EXEC, usar ela
+    2. Se não tem, usar NM_PRESTADOR_EXEC
+    3. Se valor for diferente de INTERCÂMBIO -> LOCAL, se for INTERCÂMBIO mantém INTERCÂMBIO
     """
-    # Lista corrigida de palavras-chave para intercâmbio
-    palavras_intercambio = [
-        'SÍRIO', 'SIRIO', 'LIBANÊS', 'ALBERT EINSTEIN', 'EINSTEIN',
-        'MOINHOS DE VENTO', 'MOINHOS', 'HOSPITAL SÃO PAULO',
-        'SÃO PAULO', 'RIO DE JANEIRO', 'BRASÍLIA', 'HCFMUSP',
-        'HOSPITAL DAS CLÍNICAS', 'CLÍNICAS', 'SANTAS CASAS',
-        'SANTA CASA DE SÃO PAULO', 'UNIFESP', 'HOSPITAL DO SERVIDOR',
-        'SERVIDOR PÚBLICO', 'HOSPITAL PORTUGUÊS', 'PORTUGUÊS'
-    ]
-    
-    def classificar_por_nome(nome):
-        if pd.isna(nome):
+    # Verificar se tem a coluna de tipo
+    if 'TP_PRESTADOR_EXEC' in df.columns:
+        # Se tem a coluna de tipo, usar ela conforme a lógica
+        df['TP_PRESTADOR_ORIGINAL'] = df['TP_PRESTADOR_EXEC']
+        
+        def classificar_local_intercambio(tipo):
+            if pd.isna(tipo):
+                return 'LOCAL'
+            tipo_str = str(tipo).upper().strip()
+            palavras_intercambio = ['INTERCÂMBIO', 'INTERCAMBIO', 'INTER', 'EXTRA', 'FORA', 'EXTERNO']
+            for palavra in palavras_intercambio:
+                if palavra in tipo_str:
+                    return 'INTERCÂMBIO'
             return 'LOCAL'
         
-        nome_str = str(nome).upper()
+        df['TP_PRESTADOR_CLASSIFICADO'] = df['TP_PRESTADOR_EXEC'].apply(classificar_local_intercambio)
+    else:
+        # Se não tem, classificar pelo nome do prestador
+        df['TP_PRESTADOR_ORIGINAL'] = 'NÃO INFORMADO'
         
-        # Primeiro, verificar se é claramente local (Unimed)
-        if 'UNIMED' in nome_str:
+        # LISTA CORRIGIDA DE PRESTADORES DE INTERCÂMBIO
+        palavras_intercambio = [
+            'SÍRIO', 'SIRIO', 'LIBANÊS', 'ALBERT EINSTEIN', 'EINSTEIN',
+            'MOINHOS DE VENTO', 'MOINHOS', 'HOSPITAL SÃO PAULO',
+            'SÃO PAULO', 'RIO DE JANEIRO', 'BRASÍLIA', 'HCFMUSP',
+            'HOSPITAL DAS CLÍNICAS', 'CLÍNICAS', 'SANTAS CASAS',
+            'SANTA CASA DE SÃO PAULO', 'UNIFESP', 'HOSPITAL DO SERVIDOR',
+            'SERVIDOR PÚBLICO', 'HOSPITAL PORTUGUÊS', 'PORTUGUÊS'
+        ]
+        
+        def classificar_por_nome(nome):
+            if pd.isna(nome):
+                return 'LOCAL'
+            
+            nome_str = str(nome).upper()
+            
+            # Primeiro, verificar se é claramente local (Unimed)
+            if 'UNIMED' in nome_str:
+                return 'LOCAL'
+            
+            # Verificar se é intercâmbio
+            for palavra in palavras_intercambio:
+                if palavra in nome_str:
+                    return 'INTERCÂMBIO'
+            
+            # Se não for nenhum dos casos acima, considerar LOCAL
             return 'LOCAL'
         
-        # Verificar se é intercâmbio
-        for palavra in palavras_intercambio:
-            if palavra in nome_str:
-                return 'INTERCÂMBIO'
-        
-        # Se não for nenhum dos casos acima, considerar LOCAL
-        return 'LOCAL'
+        df['TP_PRESTADOR_CLASSIFICADO'] = df['NM_PRESTADOR_EXEC'].apply(classificar_por_nome)
     
-    # Criar coluna de classificação
-    df['TP_PRESTADOR_CLASSIFICADO'] = df['NM_PRESTADOR_EXEC'].apply(classificar_por_nome)
+    # Município (se não existir)
+    if 'MUNICIPIO_PRESTADOR' not in df.columns:
+        df['MUNICIPIO_PRESTADOR'] = 'NÃO INFORMADO'
+    else:
+        df['MUNICIPIO_PRESTADOR'] = df['MUNICIPIO_PRESTADOR'].astype(str).str.strip()
     
     return df
 
@@ -248,7 +275,7 @@ def carregar_e_preparar_dados():
             st.info(f"✅ Carregando dados de: {os.path.basename(caminho_csv)}")
             df = pd.read_csv(caminho_csv, encoding='utf-8')
             
-            # Limpeza básica
+            # Limpeza básica de colunas
             df.columns = [c.strip().upper() for c in df.columns]
             
             # Verificar colunas obrigatórias
@@ -259,6 +286,25 @@ def carregar_e_preparar_dados():
             if colunas_faltantes:
                 st.warning(f"⚠️ Colunas faltantes: {', '.join(colunas_faltantes)}")
                 return criar_dados_simulados()
+            
+            # ============================================
+            # APLICAR LÓGICA DE CLASSIFICAÇÃO COMPLETA
+            # ============================================
+            df = classificar_prestador_local_intercambio(df)
+            
+            # ============================================
+            # LIMPEZA BÁSICA (mesma do código fornecido)
+            # ============================================
+            df = df[df['VL_LIBERADO'] > 0]
+            df = df[df['QT_ITEM'] > 0]
+            
+            # Conversão de tipos (mesma do código fornecido)
+            try:
+                df['CD_BENEFICIARIO'] = pd.to_numeric(df['CD_BENEFICIARIO'], errors='coerce')
+                df['QT_ITEM'] = pd.to_numeric(df['QT_ITEM'], errors='coerce').fillna(0).astype(int)
+                df['VL_LIBERADO'] = pd.to_numeric(df['VL_LIBERADO'], errors='coerce')
+            except:
+                pass
             
             # Processar competência se existir
             if 'COMPETENCIA' in df.columns:
@@ -301,9 +347,6 @@ def carregar_e_preparar_dados():
                 )
                 df['DATA_COMPETENCIA'] = df.apply(lambda x: datetime(2024, int(x['MES_COMP']), 1), axis=1)
             
-            # Aplicar classificação LOCAL/INTERCÂMBIO
-            df = classificar_prestador_local_intercambio(df)
-            
             # Adicionar valor por diária
             df['VL_POR_DIARIA'] = df['VL_LIBERADO'] / df['QT_ITEM']
             
@@ -344,6 +387,7 @@ def criar_dados_simulados():
         'DIÁRIA DE ACOMPANHANTE', 'DIÁRIA DE OBSERVAÇÃO'
     ]
     
+    # Criar DataFrame base
     df = pd.DataFrame({
         'NM_PRESTADOR_EXEC': np.random.choice(prestadores, n, 
             p=[0.15, 0.12, 0.08, 0.1, 0.08, 0.07, 0.05, 0.08, 0.07, 0.06, 0.06, 0.05, 0.03]),
@@ -364,11 +408,23 @@ def criar_dados_simulados():
     df['MES_ANO_FORMATADO'] = df.apply(lambda x: f"{obter_nome_mes(x['MES_COMP'])}/2024", axis=1)
     df['DATA_COMPETENCIA'] = df.apply(lambda x: datetime(2024, int(x['MES_COMP']), 1), axis=1)
     
-    # Aplicar classificação LOCAL/INTERCÂMBIO
+    # Aplicar classificação LOCAL/INTERCÂMBIO com a nova função
     df = classificar_prestador_local_intercambio(df)
     
     # Adicionar valor por diária
     df['VL_POR_DIARIA'] = df['VL_LIBERADO'] / df['QT_ITEM']
+    
+    # Limpeza básica (igual ao código fornecido)
+    df = df[df['VL_LIBERADO'] > 0]
+    df = df[df['QT_ITEM'] > 0]
+    
+    # Conversão de tipos
+    try:
+        df['CD_BENEFICIARIO'] = pd.to_numeric(df['CD_BENEFICIARIO'], errors='coerce')
+        df['QT_ITEM'] = pd.to_numeric(df['QT_ITEM'], errors='coerce').fillna(0).astype(int)
+        df['VL_LIBERADO'] = pd.to_numeric(df['VL_LIBERADO'], errors='coerce')
+    except:
+        pass
     
     return df
 
@@ -1333,7 +1389,7 @@ def mostrar_dashboard():
         
         # Aplicar formatação brasileira
         ranking_formatado['VL_LIBERADO'] = ranking_formatado['VL_LIBERADO'].apply(formatar_moeda_br)
-        ranking_formatado['CD_BENEFICIARIO'] = ranking_formatado['CD_BENEFICIARio'].apply(formatar_inteiro_br)
+        ranking_formatado['CD_BENEFICIARIO'] = ranking_formatado['CD_BENEFICIARIO'].apply(formatar_inteiro_br)
         ranking_formatado['QT_ITEM'] = ranking_formatado['QT_ITEM'].apply(formatar_inteiro_br)
         ranking_formatado['Valor Médio'] = ranking_formatado['Valor Médio'].apply(formatar_moeda_br)
         
