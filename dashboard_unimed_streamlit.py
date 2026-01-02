@@ -683,7 +683,7 @@ def mostrar_dashboard():
                 
                 # Distribuição
                 local_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICADO'] == 'LOCAL'])
-                intercambio_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICado'] == 'INTERCÂMBIO'])
+                intercambio_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICADO'] == 'INTERCÂMBIO'])
                 total = len(df_status)
                 if total > 0:
                     st.write(f"**Local:** {formatar_inteiro_br(local_count)} ({local_count/total*100:.1f}%)")
