@@ -604,7 +604,7 @@ def tela_login():
             try:
                 senha_correta = st.secrets["SENHA_CORPORATIVA"]
             except:
-                senha_correta = "Diariasd@2025!Dashboard"
+                senha_correta = "Unimed@2024!Dashboard"
                 st.warning("⚠️ Usando senha padrão. Configure os Secrets no Streamlit Cloud.")
             
             if senha_digitada == senha_correta:
@@ -683,7 +683,7 @@ def mostrar_dashboard():
                 
                 # Distribuição
                 local_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICADO'] == 'LOCAL'])
-                intercambio_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICADO'] == 'INTERCÂMBIO'])
+                intercambio_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICado'] == 'INTERCÂMBIO'])
                 total = len(df_status)
                 if total > 0:
                     st.write(f"**Local:** {formatar_inteiro_br(local_count)} ({local_count/total*100:.1f}%)")
@@ -859,6 +859,20 @@ def mostrar_dashboard():
                 key="filtro_valor_max"
             )
     
+    with col8:
+        # Quantidade máxima
+        if 'QT_ITEM' in df.columns:
+            qt_max = st.number_input(
+                "📊 Máx. Diárias",
+                min_value=int(df['QT_ITEM'].min()),
+                max_value=int(df['QT_ITEM'].max()),
+                value=int(df['QT_ITEM'].max()),
+                step=1,
+                key="filtro_quantidade"
+            )
+    
+    # Botões de controle - CORREÇÃO AQUI
+    col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
     with col_btn1:
         aplicar_filtros = st.button("✅ Aplicar Filtros", use_container_width=True, type="primary")
     with col_btn2:
@@ -980,7 +994,7 @@ def mostrar_dashboard():
                 {formatar_moeda_br(valor_local)}
             </div>
             <div style="font-size: 12px; color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; margin-top: 5px;">
-                {formatar_inteiro_br(len(local_df))} reg • {perc_local:.1f}%
+                {formatar_inteiro_br(len(local_df) if 'local_df' in locals() else 0)} reg • {perc_local:.1f}%
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -995,7 +1009,7 @@ def mostrar_dashboard():
                 {formatar_moeda_br(valor_intercambio)}
             </div>
             <div style="font-size: 12px; color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; margin-top: 5px;">
-                {formatar_inteiro_br(len(intercambio_df))} reg • {perc_intercambio:.1f}%
+                {formatar_inteiro_br(len(intercambio_df) if 'intercambio_df' in locals() else 0)} reg • {perc_intercambio:.1f}%
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1026,7 +1040,7 @@ def mostrar_dashboard():
                 {formatar_moeda_br(media_por_paciente)}
             </div>
             <div style="font-size: 12px; color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; margin-top: 5px;">
-                Diárias/paciente: {(total_diarias/pacientes_unicos):.1f}
+                Diárias/paciente: {(total_diarias/pacientes_unicos):.1f if pacientes_unicos > 0 else 0}
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1314,7 +1328,7 @@ def mostrar_dashboard():
         
         # Aplicar formatação brasileira
         ranking_formatado['VL_LIBERADO'] = ranking_formatado['VL_LIBERADO'].apply(formatar_moeda_br)
-        ranking_formatado['CD_BENEFICIARIO'] = ranking_formatado['CD_BENEFICIARIO'].apply(formatar_inteiro_br)
+        ranking_formatado['CD_BENEFICIARIO'] = ranking_formatado['CD_BENEFICIARio'].apply(formatar_inteiro_br)
         ranking_formatado['QT_ITEM'] = ranking_formatado['QT_ITEM'].apply(formatar_inteiro_br)
         ranking_formatado['Valor Médio'] = ranking_formatado['Valor Médio'].apply(formatar_moeda_br)
         
