@@ -1,3 +1,43 @@
+# CONFIGURAÇÕES NO CÓDIGO (substitui config.toml)
+st.set_page_config(
+    page_title="Dashboard Unimed - Diárias Hospitalares",
+    page_icon="🏥",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://www.unimed.com.br',
+        'Report a bug': None,
+        'About': f"""
+        Dashboard de Diárias Hospitalares - Unimed
+        Versão: {VERSAO}
+        Desenvolvedor: {DESENVOLVEDOR}
+        """
+    }
+)
+
+# Configurações de tema via CSS (substitui config.toml)
+def aplicar_css():
+    """Aplica CSS baseado no tema selecionado"""
+    if st.session_state.tema == "dark":
+        css = """
+        <style>
+            /* Modo escuro */
+            .main { background-color: #0f172a; color: #e2e8f0; }
+            h1, h2, h3, h4 { color: #ffffff; }
+            .stMetric { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        </style>
+        """
+    else:
+        css = """
+        <style>
+            /* Modo claro */
+            .main { background-color: #f8fafc; color: #334155; }
+            h1, h2, h3, h4 { color: #1e293b; }
+            .stMetric { background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); }
+        </style>
+        """
+    st.markdown(css, unsafe_allow_html=True)
+
 # dashboard_unimed_streamlit_cloud.py
 import streamlit as st
 import pandas as pd
