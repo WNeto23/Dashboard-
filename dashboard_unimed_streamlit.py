@@ -1,43 +1,3 @@
-# CONFIGURAÇÕES NO CÓDIGO (substitui config.toml)
-st.set_page_config(
-    page_title="Dashboard Unimed - Diárias Hospitalares",
-    page_icon="🏥",
-    layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={
-        'Get Help': 'https://www.unimed.com.br',
-        'Report a bug': None,
-        'About': f"""
-        Dashboard de Diárias Hospitalares - Unimed
-        Versão: {VERSAO}
-        Desenvolvedor: {DESENVOLVEDOR}
-        """
-    }
-)
-
-# Configurações de tema via CSS (substitui config.toml)
-def aplicar_css():
-    """Aplica CSS baseado no tema selecionado"""
-    if st.session_state.tema == "dark":
-        css = """
-        <style>
-            /* Modo escuro */
-            .main { background-color: #0f172a; color: #e2e8f0; }
-            h1, h2, h3, h4 { color: #ffffff; }
-            .stMetric { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
-        </style>
-        """
-    else:
-        css = """
-        <style>
-            /* Modo claro */
-            .main { background-color: #f8fafc; color: #334155; }
-            h1, h2, h3, h4 { color: #1e293b; }
-            .stMetric { background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); }
-        </style>
-        """
-    st.markdown(css, unsafe_allow_html=True)
-
 # dashboard_unimed_streamlit_cloud.py
 import streamlit as st
 import pandas as pd
@@ -53,6 +13,23 @@ import hashlib
 import base64
 
 warnings.filterwarnings('ignore')
+
+# ============================================
+# CONFIGURAÇÃO DA PÁGINA (OBRIGATÓRIO NO TOPO)
+# ============================================
+st.set_page_config(
+    page_title="Dashboard Unimed - Diárias Hospitalares",
+    page_icon="🏥",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://www.unimed.com.br',
+        'Report a bug': None,
+        'About': f"""
+        Dashboard de Diárias Hospitalares - Unimed
+        """
+    }
+)
 
 # ============================================
 # CONFIGURAÇÕES GLOBAIS
@@ -74,14 +51,355 @@ VERSAO = "7.0.0 (Streamlit Cloud Edition)"
 LINK_ACESSO = "https://dashboard-unimed.streamlit.app"
 
 # ============================================
+# CSS PERSONALIZADO DINÂMICO
+# ============================================
+def aplicar_css():
+    """Aplica CSS baseado no tema selecionado"""
+    
+    if st.session_state.tema == "dark":
+        css = """
+        <style>
+            /* Modo escuro profissional */
+            .main {
+                background-color: #0f172a !important;
+                color: #e2e8f0 !important;
+                font-family: 'Segoe UI', sans-serif !important;
+            }
+            
+            /* Cabeçalhos */
+            h1, h2, h3, h4 {
+                color: #ffffff !important;
+                font-weight: 600 !important;
+            }
+            
+            /* Métricas */
+            .stMetric {
+                background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+                border-radius: 10px !important;
+                padding: 15px !important;
+                border-left: 4px solid !important;
+                margin-bottom: 10px !important;
+                border: 1px solid #334155 !important;
+            }
+            
+            .metric-local { border-left-color: #22c55e !important; }
+            .metric-intercambio { border-left-color: #3b82f6 !important; }
+            .metric-total { border-left-color: #f59e0b !important; }
+            .metric-pacientes { border-left-color: #8b5cf6 !important; }
+            .metric-media { border-left-color: #ec4899 !important; }
+            
+            div[data-testid="stMetricValue"] {
+                font-size: 24px !important;
+                font-weight: 700 !important;
+                color: white !important;
+                line-height: 1.2 !important;
+            }
+            
+            div[data-testid="stMetricLabel"] {
+                font-size: 14px !important;
+                color: #94a3b8 !important;
+                font-weight: 500 !important;
+            }
+            
+            /* Abas */
+            .stTabs [data-baseweb="tab-list"] {
+                gap: 8px !important;
+                background-color: #1e293b !important;
+                padding: 8px !important;
+                border-radius: 8px !important;
+                margin-bottom: 20px !important;
+                border: 1px solid #334155 !important;
+            }
+            
+            .stTabs [data-baseweb="tab"] {
+                border-radius: 6px !important;
+                padding: 10px 20px !important;
+                background-color: #334155 !important;
+                color: #94a3b8 !important;
+                font-weight: 500 !important;
+                transition: all 0.3s ease !important;
+                border: 1px solid #475569 !important;
+            }
+            
+            .stTabs [aria-selected="true"] {
+                background-color: #3b82f6 !important;
+                color: white !important;
+                border-color: #3b82f6 !important;
+            }
+            
+            /* Sidebar */
+            section[data-testid="stSidebar"] {
+                background-color: #1e293b !important;
+                border-right: 1px solid #334155 !important;
+            }
+            
+            /* Botões */
+            .stButton > button {
+                border-radius: 8px !important;
+                font-weight: 600 !important;
+                transition: all 0.3s ease !important;
+                border: 1px solid #475569 !important;
+            }
+            
+            .stButton > button:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+            }
+            
+            /* Tabelas */
+            .dataframe {
+                background-color: #1e293b !important;
+                border-radius: 8px !important;
+                overflow: hidden !important;
+                border: 1px solid #334155 !important;
+            }
+            
+            .dataframe th {
+                background-color: #334155 !important;
+                color: white !important;
+                font-weight: 600 !important;
+                border-bottom: 1px solid #475569 !important;
+            }
+            
+            .dataframe td {
+                color: #e2e8f0 !important;
+                border-bottom: 1px solid #475569 !important;
+            }
+            
+            /* Selectboxes e inputs */
+            .stSelectbox, .stNumberInput, .stTextInput {
+                background-color: #1e293b !important;
+            }
+            
+            /* Status info */
+            .status-info {
+                background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+                border-radius: 10px !important;
+                padding: 15px !important;
+                border-left: 4px solid #3b82f6 !important;
+                margin: 10px 0 !important;
+                border: 1px solid #334155 !important;
+            }
+            
+            /* Scrollbar */
+            ::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: #1e293b;
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: #475569;
+                border-radius: 4px;
+            }
+            
+            ::-webkit-scrollbar-thumb:hover {
+                background: #64748b;
+            }
+            
+            /* Tooltip personalizado */
+            .tooltip {
+                position: relative;
+                display: inline-block;
+                border-bottom: 1px dotted #64748b;
+            }
+            
+            .tooltip .tooltiptext {
+                visibility: hidden;
+                background-color: #1e293b;
+                color: #e2e8f0;
+                text-align: center;
+                border-radius: 6px;
+                padding: 5px 10px;
+                position: absolute;
+                z-index: 1;
+                bottom: 125%;
+                left: 50%;
+                transform: translateX(-50%);
+                white-space: nowrap;
+                border: 1px solid #334155;
+            }
+            
+            .tooltip:hover .tooltiptext {
+                visibility: visible;
+            }
+        </style>
+        """
+    else:
+        css = """
+        <style>
+            /* Modo claro profissional */
+            .main {
+                background-color: #f8fafc !important;
+                color: #334155 !important;
+                font-family: 'Segoe UI', sans-serif !important;
+            }
+            
+            /* Cabeçalhos */
+            h1, h2, h3, h4 {
+                color: #1e293b !important;
+                font-weight: 600 !important;
+            }
+            
+            /* Métricas */
+            .stMetric {
+                background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
+                border-radius: 10px !important;
+                padding: 15px !important;
+                border-left: 4px solid !important;
+                margin-bottom: 10px !important;
+                border: 1px solid #e2e8f0 !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+            }
+            
+            .metric-local { border-left-color: #16a34a !important; }
+            .metric-intercambio { border-left-color: #2563eb !important; }
+            .metric-total { border-left-color: #d97706 !important; }
+            .metric-pacientes { border-left-color: #7c3aed !important; }
+            .metric-media { border-left-color: #db2777 !important; }
+            
+            div[data-testid="stMetricValue"] {
+                font-size: 24px !important;
+                font-weight: 700 !important;
+                color: #1e293b !important;
+                line-height: 1.2 !important;
+            }
+            
+            div[data-testid="stMetricLabel"] {
+                font-size: 14px !important;
+                color: #64748b !important;
+                font-weight: 500 !important;
+            }
+            
+            /* Abas */
+            .stTabs [data-baseweb="tab-list"] {
+                gap: 8px !important;
+                background-color: #f1f5f9 !important;
+                padding: 8px !important;
+                border-radius: 8px !important;
+                margin-bottom: 20px !important;
+                border: 1px solid #e2e8f0 !important;
+            }
+            
+            .stTabs [data-baseweb="tab"] {
+                border-radius: 6px !important;
+                padding: 10px 20px !important;
+                background-color: #ffffff !important;
+                color: #64748b !important;
+                font-weight: 500 !important;
+                transition: all 0.3s ease !important;
+                border: 1px solid #e2e8f0 !important;
+            }
+            
+            .stTabs [aria-selected="true"] {
+                background-color: #3b82f6 !important;
+                color: white !important;
+                border-color: #3b82f6 !important;
+            }
+            
+            /* Sidebar */
+            section[data-testid="stSidebar"] {
+                background-color: #f1f5f9 !important;
+                border-right: 1px solid #e2e8f0 !important;
+            }
+            
+            /* Botões */
+            .stButton > button {
+                border-radius: 8px !important;
+                font-weight: 600 !important;
+                transition: all 0.3s ease !important;
+                border: 1px solid #e2e8f0 !important;
+            }
+            
+            .stButton > button:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1) !important;
+            }
+            
+            /* Tabelas */
+            .dataframe {
+                background-color: white !important;
+                border-radius: 8px !important;
+                overflow: hidden !important;
+                border: 1px solid #e2e8f0 !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+            }
+            
+            .dataframe th {
+                background-color: #f8fafc !important;
+                color: #1e293b !important;
+                font-weight: 600 !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+            }
+            
+            .dataframe td {
+                color: #334155 !important;
+                border-bottom: 1px solid #f1f5f9 !important;
+            }
+            
+            /* Selectboxes e inputs */
+            .stSelectbox, .stNumberInput, .stTextInput {
+                background-color: white !important;
+            }
+            
+            /* Status info */
+            .status-info {
+                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+                border-radius: 10px !important;
+                padding: 15px !important;
+                border-left: 4px solid #3b82f6 !important;
+                margin: 10px 0 !important;
+                border: 1px solid #e2e8f0 !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+            }
+            
+            /* Scrollbar */
+            ::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: #f1f5f9;
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+            
+            ::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
+        </style>
+        """
+    
+    st.markdown(css, unsafe_allow_html=True)
+
+# Aplicar CSS
+aplicar_css()
+
+# ============================================
 # SISTEMA DE LOGIN CORPORATIVO AVANÇADO
 # ============================================
 def check_password():
     """Sistema de login corporativo com múltiplas camadas de segurança"""
     def password_entered():
         """Verifica se a senha está correta."""
-        # Senha corporativa - ALTERE AQUI PARA SUA SENHA
-        SENHA_CORPORATIVA = "Unimed@2024!Dashboard"
+        # ✅ CORREÇÃO: Usar Secrets do Streamlit Cloud
+        # IMPORTANTE: No Streamlit Cloud, configure no Secrets:
+        # SENHA_CORPORATIVA = "Unimed@2024!Dashboard"
+        
+        try:
+            # Tentar usar Secrets do Streamlit Cloud
+            SENHA_CORPORATIVA = st.secrets["SENHA_CORPORATIVA"]
+        except:
+            # Fallback para desenvolvimento local
+            SENHA_CORPORATIVA = "Unimed@2024!Dashboard"
+            st.warning("⚠️ Usando senha padrão para desenvolvimento. Configure os Secrets no Streamlit Cloud.")
         
         # Verificar senha
         if st.session_state["password"] == SENHA_CORPORATIVA:
@@ -530,454 +848,105 @@ def criar_dados_simulados():
     return df
 
 # ============================================
-# CSS PERSONALIZADO DINÂMICO
-# ============================================
-def aplicar_css():
-    """Aplica CSS baseado no tema selecionado"""
-    
-    if st.session_state.tema == "dark":
-        css = """
-        <style>
-            /* Modo escuro profissional */
-            .main {
-                background-color: #0f172a !important;
-                color: #e2e8f0 !important;
-                font-family: 'Segoe UI', sans-serif !important;
-            }
-            
-            /* Cabeçalhos */
-            h1, h2, h3, h4 {
-                color: #ffffff !important;
-                font-weight: 600 !important;
-            }
-            
-            /* Métricas */
-            .stMetric {
-                background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
-                border-radius: 10px !important;
-                padding: 15px !important;
-                border-left: 4px solid !important;
-                margin-bottom: 10px !important;
-                border: 1px solid #334155 !important;
-            }
-            
-            .metric-local { border-left-color: #22c55e !important; }
-            .metric-intercambio { border-left-color: #3b82f6 !important; }
-            .metric-total { border-left-color: #f59e0b !important; }
-            .metric-pacientes { border-left-color: #8b5cf6 !important; }
-            .metric-media { border-left-color: #ec4899 !important; }
-            
-            div[data-testid="stMetricValue"] {
-                font-size: 24px !important;
-                font-weight: 700 !important;
-                color: white !important;
-                line-height: 1.2 !important;
-            }
-            
-            div[data-testid="stMetricLabel"] {
-                font-size: 14px !important;
-                color: #94a3b8 !important;
-                font-weight: 500 !important;
-            }
-            
-            /* Abas */
-            .stTabs [data-baseweb="tab-list"] {
-                gap: 8px !important;
-                background-color: #1e293b !important;
-                padding: 8px !important;
-                border-radius: 8px !important;
-                margin-bottom: 20px !important;
-                border: 1px solid #334155 !important;
-            }
-            
-            .stTabs [data-baseweb="tab"] {
-                border-radius: 6px !important;
-                padding: 10px 20px !important;
-                background-color: #334155 !important;
-                color: #94a3b8 !important;
-                font-weight: 500 !important;
-                transition: all 0.3s ease !important;
-                border: 1px solid #475569 !important;
-            }
-            
-            .stTabs [aria-selected="true"] {
-                background-color: #3b82f6 !important;
-                color: white !important;
-                border-color: #3b82f6 !important;
-            }
-            
-            /* Sidebar */
-            section[data-testid="stSidebar"] {
-                background-color: #1e293b !important;
-                border-right: 1px solid #334155 !important;
-            }
-            
-            /* Botões */
-            .stButton > button {
-                border-radius: 8px !important;
-                font-weight: 600 !important;
-                transition: all 0.3s ease !important;
-                border: 1px solid #475569 !important;
-            }
-            
-            .stButton > button:hover {
-                transform: translateY(-2px) !important;
-                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
-            }
-            
-            /* Tabelas */
-            .dataframe {
-                background-color: #1e293b !important;
-                border-radius: 8px !important;
-                overflow: hidden !important;
-                border: 1px solid #334155 !important;
-            }
-            
-            .dataframe th {
-                background-color: #334155 !important;
-                color: white !important;
-                font-weight: 600 !important;
-                border-bottom: 1px solid #475569 !important;
-            }
-            
-            .dataframe td {
-                color: #e2e8f0 !important;
-                border-bottom: 1px solid #475569 !important;
-            }
-            
-            /* Selectboxes e inputs */
-            .stSelectbox, .stNumberInput, .stTextInput {
-                background-color: #1e293b !important;
-            }
-            
-            /* Status info */
-            .status-info {
-                background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
-                border-radius: 10px !important;
-                padding: 15px !important;
-                border-left: 4px solid #3b82f6 !important;
-                margin: 10px 0 !important;
-                border: 1px solid #334155 !important;
-            }
-            
-            /* Scrollbar */
-            ::-webkit-scrollbar {
-                width: 8px;
-                height: 8px;
-            }
-            
-            ::-webkit-scrollbar-track {
-                background: #1e293b;
-            }
-            
-            ::-webkit-scrollbar-thumb {
-                background: #475569;
-                border-radius: 4px;
-            }
-            
-            ::-webkit-scrollbar-thumb:hover {
-                background: #64748b;
-            }
-            
-            /* Tooltip personalizado */
-            .tooltip {
-                position: relative;
-                display: inline-block;
-                border-bottom: 1px dotted #64748b;
-            }
-            
-            .tooltip .tooltiptext {
-                visibility: hidden;
-                background-color: #1e293b;
-                color: #e2e8f0;
-                text-align: center;
-                border-radius: 6px;
-                padding: 5px 10px;
-                position: absolute;
-                z-index: 1;
-                bottom: 125%;
-                left: 50%;
-                transform: translateX(-50%);
-                white-space: nowrap;
-                border: 1px solid #334155;
-            }
-            
-            .tooltip:hover .tooltiptext {
-                visibility: visible;
-            }
-        </style>
-        """
-    else:
-        css = """
-        <style>
-            /* Modo claro profissional */
-            .main {
-                background-color: #f8fafc !important;
-                color: #334155 !important;
-                font-family: 'Segoe UI', sans-serif !important;
-            }
-            
-            /* Cabeçalhos */
-            h1, h2, h3, h4 {
-                color: #1e293b !important;
-                font-weight: 600 !important;
-            }
-            
-            /* Métricas */
-            .stMetric {
-                background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
-                border-radius: 10px !important;
-                padding: 15px !important;
-                border-left: 4px solid !important;
-                margin-bottom: 10px !important;
-                border: 1px solid #e2e8f0 !important;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
-            }
-            
-            .metric-local { border-left-color: #16a34a !important; }
-            .metric-intercambio { border-left-color: #2563eb !important; }
-            .metric-total { border-left-color: #d97706 !important; }
-            .metric-pacientes { border-left-color: #7c3aed !important; }
-            .metric-media { border-left-color: #db2777 !important; }
-            
-            div[data-testid="stMetricValue"] {
-                font-size: 24px !important;
-                font-weight: 700 !important;
-                color: #1e293b !important;
-                line-height: 1.2 !important;
-            }
-            
-            div[data-testid="stMetricLabel"] {
-                font-size: 14px !important;
-                color: #64748b !important;
-                font-weight: 500 !important;
-            }
-            
-            /* Abas */
-            .stTabs [data-baseweb="tab-list"] {
-                gap: 8px !important;
-                background-color: #f1f5f9 !important;
-                padding: 8px !important;
-                border-radius: 8px !important;
-                margin-bottom: 20px !important;
-                border: 1px solid #e2e8f0 !important;
-            }
-            
-            .stTabs [data-baseweb="tab"] {
-                border-radius: 6px !important;
-                padding: 10px 20px !important;
-                background-color: #ffffff !important;
-                color: #64748b !important;
-                font-weight: 500 !important;
-                transition: all 0.3s ease !important;
-                border: 1px solid #e2e8f0 !important;
-            }
-            
-            .stTabs [aria-selected="true"] {
-                background-color: #3b82f6 !important;
-                color: white !important;
-                border-color: #3b82f6 !important;
-            }
-            
-            /* Sidebar */
-            section[data-testid="stSidebar"] {
-                background-color: #f1f5f9 !important;
-                border-right: 1px solid #e2e8f0 !important;
-            }
-            
-            /* Botões */
-            .stButton > button {
-                border-radius: 8px !important;
-                font-weight: 600 !important;
-                transition: all 0.3s ease !important;
-                border: 1px solid #e2e8f0 !important;
-            }
-            
-            .stButton > button:hover {
-                transform: translateY(-2px) !important;
-                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1) !important;
-            }
-            
-            /* Tabelas */
-            .dataframe {
-                background-color: white !important;
-                border-radius: 8px !important;
-                overflow: hidden !important;
-                border: 1px solid #e2e8f0 !important;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
-            }
-            
-            .dataframe th {
-                background-color: #f8fafc !important;
-                color: #1e293b !important;
-                font-weight: 600 !important;
-                border-bottom: 1px solid #e2e8f0 !important;
-            }
-            
-            .dataframe td {
-                color: #334155 !important;
-                border-bottom: 1px solid #f1f5f9 !important;
-            }
-            
-            /* Selectboxes e inputs */
-            .stSelectbox, .stNumberInput, .stTextInput {
-                background-color: white !important;
-            }
-            
-            /* Status info */
-            .status-info {
-                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
-                border-radius: 10px !important;
-                padding: 15px !important;
-                border-left: 4px solid #3b82f6 !important;
-                margin: 10px 0 !important;
-                border: 1px solid #e2e8f0 !important;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
-            }
-            
-            /* Scrollbar */
-            ::-webkit-scrollbar {
-                width: 8px;
-                height: 8px;
-            }
-            
-            ::-webkit-scrollbar-track {
-                background: #f1f5f9;
-            }
-            
-            ::-webkit-scrollbar-thumb {
-                background: #cbd5e1;
-                border-radius: 4px;
-            }
-            
-            ::-webkit-scrollbar-thumb:hover {
-                background: #94a3b8;
-            }
-        </style>
-        """
-    
-    st.markdown(css, unsafe_allow_html=True)
-
-# ============================================
-# CONFIGURAÇÃO DA PÁGINA
-# ============================================
-st.set_page_config(
-    page_title="Dashboard Unimed - Diárias Hospitalares",
-    page_icon="🏥",
-    layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={
-        'Get Help': 'https://www.unimed.com.br',
-        'Report a bug': None,
-        'About': f"""
-        Dashboard de Diárias Hospitalares - Unimed
-        Versão: {VERSAO}
-        Desenvolvedor: {DESENVOLVEDOR}
-        """
-    }
-)
-
-# Aplicar CSS
-aplicar_css()
-
-# ============================================
 # SIDEBAR AVANÇADA
 # ============================================
-with st.sidebar:
-    # Cabeçalho com informações
-    st.markdown(f"""
-    <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid {'#334155' if st.session_state.tema == 'dark' else '#e2e8f0'};">
-        <h2 style="color: #3b82f6; margin-bottom: 5px;">🏥 UNIMED</h2>
-        <p style="color: {'#94a3b8' if st.session_state.tema == 'dark' else '#64748b'}; font-size: 14px; margin-bottom: 5px;">
-            Dashboard de Diárias Hospitalares
-        </p>
-        <p style="color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; font-size: 12px;">
-            v{VERSAO} • Streamlit Cloud
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Controle de tema
-    col_theme1, col_theme2 = st.columns([3, 1])
-    with col_theme1:
-        tema_icon = "🌙" if st.session_state.tema == "dark" else "☀️"
-        tema_texto = "Modo Escuro" if st.session_state.tema == "dark" else "Modo Claro"
-        st.write(f"**{tema_icon} {tema_texto}**")
-    with col_theme2:
-        if st.button("🔄", help="Alternar tema"):
-            alternar_tema()
-    
-    st.markdown("---")
-    
-    # Status do sistema
-    st.markdown("### 📊 Status do Sistema")
-    
-    # Carregar dados para status
-    df_status = carregar_e_preparar_dados()
-    if not df_status.empty:
-        col_stat1, col_stat2 = st.columns(2)
-        with col_stat1:
-            st.metric("📈 Registros", formatar_inteiro_br(len(df_status)))
-        with col_stat2:
-            valor_total_status = df_status['VL_LIBERADO'].sum()
-            st.metric("💰 Total", formatar_moeda_br(valor_total_status))
+def render_sidebar():
+    """Renderiza a sidebar"""
+    with st.sidebar:
+        # Cabeçalho com informações
+        st.markdown(f"""
+        <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid {'#334155' if st.session_state.tema == 'dark' else '#e2e8f0'};">
+            <h2 style="color: #3b82f6; margin-bottom: 5px;">🏥 UNIMED</h2>
+            <p style="color: {'#94a3b8' if st.session_state.tema == 'dark' else '#64748b'}; font-size: 14px; margin-bottom: 5px;">
+                Dashboard de Diárias Hospitalares
+            </p>
+            <p style="color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; font-size: 12px;">
+                v{VERSAO} • Streamlit Cloud
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
         
-        # Informações adicionais
-        with st.expander("ℹ️ Informações detalhadas"):
-            st.write(f"**Período:** {PERIODO_BASE}")
-            st.write(f"**Prestadores únicos:** {df_status['NM_PRESTADOR_EXEC'].nunique()}")
-            st.write(f"**Procedimentos:** {df_status['DS_PROCEDIMENTO'].nunique()}")
-            st.write(f"**Municípios:** {df_status['MUNICIPIO_PRESTADOR'].nunique()}")
+        # Controle de tema
+        col_theme1, col_theme2 = st.columns([3, 1])
+        with col_theme1:
+            tema_icon = "🌙" if st.session_state.tema == "dark" else "☀️"
+            tema_texto = "Modo Escuro" if st.session_state.tema == "dark" else "Modo Claro"
+            st.write(f"**{tema_icon} {tema_texto}**")
+        with col_theme2:
+            if st.button("🔄", help="Alternar tema"):
+                alternar_tema()
+        
+        st.markdown("---")
+        
+        # Status do sistema
+        st.markdown("### 📊 Status do Sistema")
+        
+        # Carregar dados para status
+        df_status = carregar_e_preparar_dados()
+        if not df_status.empty:
+            col_stat1, col_stat2 = st.columns(2)
+            with col_stat1:
+                st.metric("📈 Registros", formatar_inteiro_br(len(df_status)))
+            with col_stat2:
+                valor_total_status = df_status['VL_LIBERADO'].sum()
+                st.metric("💰 Total", formatar_moeda_br(valor_total_status))
             
-            # Distribuição
-            local_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICADO'] == 'LOCAL'])
-            intercambio_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICADO'] == 'INTERCÂMBIO'])
-            st.write(f"**Local:** {local_count} ({local_count/len(df_status)*100:.1f}%)")
-            st.write(f"**Intercâmbio:** {intercambio_count} ({intercambio_count/len(df_status)*100:.1f}%)")
-    
-    st.markdown("---")
-    
-    # Informações de acesso
-    st.markdown("### 🔐 Informações de Acesso")
-    
-    if 'login_time' in st.session_state:
-        tempo_sessao = datetime.now() - st.session_state["login_time"]
-        horas = int(tempo_sessao.total_seconds() // 3600)
-        minutos = int((tempo_sessao.total_seconds() % 3600) // 60)
+            # Informações adicionais
+            with st.expander("ℹ️ Informações detalhadas"):
+                st.write(f"**Período:** {PERIODO_BASE}")
+                st.write(f"**Prestadores únicos:** {df_status['NM_PRESTADOR_EXEC'].nunique()}")
+                st.write(f"**Procedimentos:** {df_status['DS_PROCEDIMENTO'].nunique()}")
+                st.write(f"**Municípios:** {df_status['MUNICIPIO_PRESTADOR'].nunique()}")
+                
+                # Distribuição
+                local_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICADO'] == 'LOCAL'])
+                intercambio_count = len(df_status[df_status['TP_PRESTADOR_CLASSIFICADO'] == 'INTERCÂMBIO'])
+                st.write(f"**Local:** {local_count} ({local_count/len(df_status)*100:.1f}%)")
+                st.write(f"**Intercâmbio:** {intercambio_count} ({intercambio_count/len(df_status)*100:.1f}%)")
         
-        st.info(f"""
-        **Sessão ativa:** {horas}h {minutos}min
-        **Expira em:** {8 - horas}h {60 - minutos}min
-        """)
-    
-    # Botão de logout
-    if st.button("🚪 Sair do Sistema", use_container_width=True, type="secondary"):
-        # Registrar logout
-        if 'access_log' in st.session_state:
-            st.session_state.access_log.append({
-                'timestamp': datetime.now(),
-                'action': 'logout'
-            })
+        st.markdown("---")
         
-        # Limpar sessão
-        keys_to_clear = ['password_correct', 'login_time', 'failed_attempts']
-        for key in keys_to_clear:
-            if key in st.session_state:
-                del st.session_state[key]
+        # Informações de acesso
+        st.markdown("### 🔐 Informações de Acesso")
         
-        st.success("✅ Logout realizado com sucesso!")
-        st.rerun()
-    
-    st.markdown("---")
-    
-    # Informações do desenvolvedor
-    st.markdown(f"""
-    <div style="color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; font-size: 11px; text-align: center;">
-        <p><strong>Desenvolvido por:</strong><br>{DESENVOLVEDOR}</p>
-        <p>📅 {PERIODO_BASE} • 🕐 {datetime.now().strftime('%H:%M')}</p>
-        <p>🌐 <code>{LINK_ACESSO}</code></p>
-    </div>
-    """, unsafe_allow_html=True)
+        if 'login_time' in st.session_state:
+            tempo_sessao = datetime.now() - st.session_state["login_time"]
+            horas = int(tempo_sessao.total_seconds() // 3600)
+            minutos = int((tempo_sessao.total_seconds() % 3600) // 60)
+            
+            st.info(f"""
+            **Sessão ativa:** {horas}h {minutos}min
+            **Expira em:** {8 - horas}h {60 - minutos}min
+            """)
+        
+        # Botão de logout
+        if st.button("🚪 Sair do Sistema", use_container_width=True, type="secondary"):
+            # Registrar logout
+            if 'access_log' in st.session_state:
+                st.session_state.access_log.append({
+                    'timestamp': datetime.now(),
+                    'action': 'logout'
+                })
+            
+            # Limpar sessão
+            keys_to_clear = ['password_correct', 'login_time', 'failed_attempts']
+            for key in keys_to_clear:
+                if key in st.session_state:
+                    del st.session_state[key]
+            
+            st.success("✅ Logout realizado com sucesso!")
+            st.rerun()
+        
+        st.markdown("---")
+        
+        # Informações do desenvolvedor
+        st.markdown(f"""
+        <div style="color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; font-size: 11px; text-align: center;">
+            <p><strong>Desenvolvido por:</strong><br>{DESENVOLVEDOR}</p>
+            <p>📅 {PERIODO_BASE} • 🕐 {datetime.now().strftime('%H:%M')}</p>
+            <p>🌐 <code>{LINK_ACESSO}</code></p>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ============================================
 # DASHBOARD PRINCIPAL
@@ -1262,8 +1231,8 @@ def dashboard_principal():
                 # Evolução do valor total
                 evolucao_valor = df_filtrado.groupby('MES_ANO_FORMATADO').agg({
                     'VL_LIBERADO': 'sum',
-                    'CD_BENEFICIARIO': 'nunique'
-                }).reset_index()
+                    'CD_BENEFICIARio': 'nunique'
+                }).resetindex()
                 
                 evolucao_valor = criar_categoria_ordenada(evolucao_valor, 'MES_ANO_FORMATADO')
                 
@@ -1573,6 +1542,12 @@ def dashboard_principal():
 # EXECUÇÃO PRINCIPAL
 # ============================================
 if __name__ == "__main__":
+    # Aplicar CSS
+    aplicar_css()
+    
+    # Renderizar sidebar
+    render_sidebar()
+    
     # Verificar autenticação
     if check_password():
         # Inicializar dashboard
