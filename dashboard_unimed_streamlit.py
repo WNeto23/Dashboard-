@@ -604,7 +604,7 @@ def tela_login():
             try:
                 senha_correta = st.secrets["SENHA_CORPORATIVA"]
             except:
-                senha_correta = "Unimed@2024!Dashboard"
+                senha_correta = "Diarias@202!Dashboard"
                 st.warning("⚠️ Usando senha padrão. Configure os Secrets no Streamlit Cloud.")
             
             if senha_digitada == senha_correta:
@@ -1031,19 +1031,24 @@ def mostrar_dashboard():
     
     with col_k5:
         media_por_paciente = valor_total / pacientes_unicos if pacientes_unicos > 0 else 0
-        st.markdown(f"""
-        <div class="metric-card metric-media">
-            <div style="font-size: 14px; color: {'#94a3b8' if st.session_state.tema == 'dark' else '#64748b'}; margin-bottom: 10px;">
-                📊 Média/Paciente
+        diarias_por_paciente = total_diarias / pacientes_unicos if pacientes_unicos > 0 else 0
+
+        st.markdown(
+            f"""
+            <div class="metric-card metric-media">
+                <div style="font-size: 14px; color: {'#94a3b8' if st.session_state.tema == 'dark' else '#64748b'}; margin-bottom: 10px;">
+                    📊 Média/Paciente
+                </div>
+                <div style="font-size: 24px; font-weight: 700; color: {'#ffffff' if st.session_state.tema == 'dark' else '#1e293b'};">
+                    {formatar_moeda_br(media_por_paciente)}
+                </div>
+                <div style="font-size: 12px; color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; margin-top: 5px;">
+                    Diárias/paciente: {diarias_por_paciente:.1f}
+                </div>
             </div>
-            <div style="font-size: 24px; font-weight: 700; color: {'#ffffff' if st.session_state.tema == 'dark' else '#1e293b'};">
-                {formatar_moeda_br(media_por_paciente)}
-            </div>
-            <div style="font-size: 12px; color: {'#64748b' if st.session_state.tema == 'dark' else '#94a3b8'}; margin-top: 5px;">
-                Diárias/paciente: {(total_diarias/pacientes_unicos):.1f if pacientes_unicos > 0 else 0}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+            """,
+            unsafe_allow_html=True
+        )
     
     # ============================================
     # GRÁFICOS COMPLETOS (ESTILO CÓDIGO 2)
